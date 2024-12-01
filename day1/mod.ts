@@ -9,7 +9,7 @@ export function process_data(data: string): number[][] {
     .map((x) => [x[0], x[3]]);
 }
 
-export function solve(data: number[][]): number {
+export function solve1(data: number[][]): number {
   const left_nums = data.map((x) => x[0]);
   const right_nums = data.map((x) => x[1]);
 
@@ -23,7 +23,29 @@ export function solve(data: number[][]): number {
     );
 }
 
+export function solve2(data: number[][]): number {
+  const left_nums = data.map((x) => x[0]);
+  const right_nums = data.map((x) => x[1]);
+
+  const right_count = right_nums.reduce<Record<number, number>>(
+    (acc, x) => {
+      acc[x] = (acc[x] || 0) + 1;
+      return acc;
+    },
+    {},
+  );
+
+  return left_nums.reduce(
+    (acc, x) => {
+      return acc + (x * (right_count[x] || 0));
+    },
+    0,
+  );
+}
+
 if (import.meta.main) {
-  const raw_data = await Deno.readTextFile("day1/input.txt");
-  console.log(solve(process_data(raw_data)));
+  const raw_data_1 = await Deno.readTextFile("day1/input.txt");
+  console.log(solve1(process_data(raw_data_1)));
+  const raw_data_2 = await Deno.readTextFile("day1/input.txt");
+  console.log(solve2(process_data(raw_data_2)));
 }
