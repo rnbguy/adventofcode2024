@@ -1,6 +1,9 @@
 {
   "workspace": {
-    "members": ["./day"]
+    "members": [
+      "./day1",
+      "./day"
+    ]
   },
   "tasks": {
     "dev": "deno run --watch main.ts"
