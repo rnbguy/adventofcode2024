@@ -44,8 +44,7 @@ export function solve2(data: number[][]): number {
 }
 
 if (import.meta.main) {
-  const raw_data_1 = await Deno.readTextFile("day1/input.txt");
-  console.log(solve1(process_data(raw_data_1)));
-  const raw_data_2 = await Deno.readTextFile("day1/input.txt");
-  console.log(solve2(process_data(raw_data_2)));
+  const raw_data = await Deno.readTextFile("day1/input.txt");
+  console.log(solve1(process_data(raw_data)));
+  console.log(solve2(process_data(raw_data)));
 }
