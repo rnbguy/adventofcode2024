@@ -1,8 +1,7 @@
 {
   "workspace": {
     "members": [
-      "./day1",
-      "./day"
+      "./day1"
     ]
   },
   "tasks": {
