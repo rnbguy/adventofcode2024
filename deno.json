@@ -2,7 +2,7 @@
   "workspace": {
     "members": [
       "./day1",
-      "./day"
+      "./day2"
     ]
   },
   "tasks": {
