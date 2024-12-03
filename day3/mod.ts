@@ -1,5 +1,10 @@
-export function solve1(_data: string): number {
-  return 0;
+export const regex = /mul\(([0-9]{1,3}),([0-9]{1,3})\)/g;
+
+export function solve1(data: string): number {
+  return data.matchAll(regex).map((match) => {
+    const [_, a, b] = match;
+    return Number(a) * Number(b);
+  }).reduce((acc, val) => acc + val, 0);
 }
 
 export function solve2(_data: string): number {
