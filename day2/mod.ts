@@ -1,4 +1,4 @@
-export function process_data(data: string): number[][] {
+export function parse(data: string): number[][] {
   const parsed = data.split("\n").map((x) =>
     x.split(" ").map((x) => parseInt(x))
   );
@@ -39,6 +39,6 @@ export function solve2(data: number[][]): number {
 if (import.meta.main) {
   const data_path = new URL("input.txt", import.meta.url).pathname;
   const data = await Deno.readTextFile(data_path);
-  console.log(solve1(process_data(data)));
-  console.log(solve2(process_data(data)));
+  console.log(solve1(parse(data)));
+  console.log(solve2(parse(data)));
 }
