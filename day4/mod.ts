@@ -1,7 +1,7 @@
 const XMAS: string = "XMAS";
 const MAS: string = "MAS";
 
-export function process_data(data: string): string[] {
+export function parse(data: string): string[] {
   const parsed = data.split("\n");
   return parsed
     // Remove the last element, which is an empty string
@@ -96,6 +96,6 @@ export function solve2(data: string[]): number {
 if (import.meta.main) {
   const data_path = new URL("input.txt", import.meta.url).pathname;
   const data = await Deno.readTextFile(data_path);
-  console.log(solve1(process_data(data)));
-  console.log(solve2(process_data(data)));
+  console.log(solve1(parse(data)));
+  console.log(solve2(parse(data)));
 }
