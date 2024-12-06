@@ -1,10 +1,7 @@
 export function parse(data: string): number[][] {
-  const parsed = data.split("\n").map((x) =>
+  return data.trim().split("\n").map((x) =>
     x.split(" ").map((x) => parseInt(x))
   );
-  return parsed
-    // Remove the last element, which is an empty string
-    .slice(0, parsed.length - 1);
 }
 
 function is_safe(report: number[]): boolean {

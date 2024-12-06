@@ -1,13 +1,5 @@
 {
-  "workspace": {
-    "members": [
-      "./day1",
-      "./day2",
-      "./day3",
-      "./day4",
-      "./day5"
-    ]
-  },
+  "workspace": ["./day*"],
   "imports": {
     "@std/assert": "jsr:@std/assert@1"
   }
