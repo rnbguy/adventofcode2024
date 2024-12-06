@@ -83,16 +83,16 @@ class Grid {
     }
   }
 
-  countX(): number {
-    let count = 0;
+  x_locations(): number[][] {
+    const locations = [];
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         if (this.isVisited(x, y)) {
-          count++;
+          locations.push([x, y]);
         }
       }
     }
-    return count;
+    return locations;
   }
 }
 export function parse(data_r: string): string[][] {
@@ -112,7 +112,7 @@ export function solve1(data: string[][]): number {
     }
   }
 
-  return grid.countX();
+  return grid.x_locations().length;
 }
 
 export function solve2(_data: string[][]): number {
