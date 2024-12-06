@@ -56,12 +56,12 @@ class Grid {
 
   changeDirection() {
     // [0, -1] -> [1, 0] -> [0, 1] -> [-1, 0] -> [0, -1]
-    let [x, y] = this.guardDirection;
+    const [x, y] = this.guardDirection;
     this.guardDirection = [-y, x];
   }
 
   guardPresent(): boolean {
-    let [x, y] = this.guard;
+    const [x, y] = this.guard;
     return this.inside(x, y);
   }
 
@@ -83,6 +83,10 @@ class Grid {
     }
   }
 
+  addObstacle(x: number, y: number) {
+    this.set(x, y, "#");
+  }
+
   x_locations(): number[][] {
     const locations = [];
     for (let y = 0; y < this.height; y++) {
@@ -95,6 +99,13 @@ class Grid {
     return locations;
   }
 }
+
+function clone(data: string[][]): string[][] {
+  return data.map((row) => {
+    return row.slice();
+  });
+}
+
 export function parse(data_r: string): string[][] {
   const data = data_r.trim();
   return data.split("\n").map((line) => {
@@ -103,7 +114,7 @@ export function parse(data_r: string): string[][] {
 }
 
 export function solve1(data: string[][]): number {
-  const grid = new Grid(data);
+  const grid = new Grid(clone(data));
 
   while (true) {
     grid.guardWalk();
@@ -115,8 +126,34 @@ export function solve1(data: string[][]): number {
   return grid.x_locations().length;
 }
 
-export function solve2(_data: string[][]): number {
-  return 0;
+export function solve2(data: string[][]): number {
+  const grid = new Grid(clone(data));
+
+  while (true) {
+    grid.guardWalk();
+    if (!grid.guardPresent()) {
+      break;
+    }
+  }
+
+  const locations = grid.x_locations();
+
+  return locations.filter(([x, y]) => {
+    const grid = new Grid(clone(data));
+    grid.addObstacle(x, y);
+    let stepCount = 0;
+    while (true) {
+      grid.guardWalk();
+      if (!grid.guardPresent()) {
+        break;
+      }
+      stepCount++;
+      if (stepCount > 2 * locations.length) {
+        return true;
+      }
+    }
+    return false;
+  }).length;
 }
 
 if (import.meta.main) {
