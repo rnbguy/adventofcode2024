@@ -154,9 +154,8 @@ class DirectedGraph {
   }
 }
 
-export function parse(data_r: string): [number[][], number[][]] {
-  const data = data_r.trim();
-  const [rules_s, pages_s, _] = data.split("\n\n");
+export function parse(data: string): [number[][], number[][]] {
+  const [rules_s, pages_s, _] = data.trim().split("\n\n");
   const rules = rules_s.split("\n").map((rule) =>
     rule.split("|").map((r) => Number(r))
   );

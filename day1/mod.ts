@@ -1,10 +1,8 @@
 export function parse(data: string): number[][] {
-  const parsed = data.split("\n").map((x) =>
+  const parsed = data.trim().split("\n").map((x) =>
     x.split(" ").map((x) => parseInt(x))
   );
   return parsed
-    // Remove the last element, which is an empty string
-    .slice(0, parsed.length - 1)
     // Three spaces are used to separate the numbers
     .map((x) => [x[0], x[3]]);
 }

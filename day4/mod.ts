@@ -2,10 +2,7 @@ const XMAS: string = "XMAS";
 const MAS: string = "MAS";
 
 export function parse(data: string): string[] {
-  const parsed = data.split("\n");
-  return parsed
-    // Remove the last element, which is an empty string
-    .slice(0, parsed.length - 1);
+  return data.trim().split("\n");
 }
 
 class Grid {
