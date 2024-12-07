@@ -9,16 +9,16 @@ export function solve1(data: string): number {
 }
 
 export function solve2(data: string): number {
-  let is_enabled = true;
+  let isEnabled = true;
   return data.matchAll(regex2).map(([m, a, b]) => {
     if (m === "do()") {
-      is_enabled = true;
+      isEnabled = true;
       return 0;
     } else if (m === "don't()") {
-      is_enabled = false;
+      isEnabled = false;
       return 0;
     } else {
-      if (is_enabled) {
+      if (isEnabled) {
         return Number(a) * Number(b);
       } else return 0;
     }
@@ -26,8 +26,8 @@ export function solve2(data: string): number {
 }
 
 if (import.meta.main) {
-  const data_path = new URL("input.txt", import.meta.url).pathname;
-  const data = await Deno.readTextFile(data_path);
+  const dataPath = new URL("input.txt", import.meta.url).pathname;
+  const data = await Deno.readTextFile(dataPath);
   console.log(solve1(data));
   console.log(solve2(data));
 }

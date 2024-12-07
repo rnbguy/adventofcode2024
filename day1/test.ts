@@ -2,8 +2,8 @@ import { assertEquals } from "@std/assert";
 import { parse, solve1, solve2 } from "./mod.ts";
 
 Deno.test(async function testExample() {
-  const example_data_path = new URL("example.txt", import.meta.url).pathname;
-  const example_data = parse(await Deno.readTextFile(example_data_path));
-  assertEquals(solve1(example_data), 11);
-  assertEquals(solve2(example_data), 31);
+  const dataPath = new URL("example.txt", import.meta.url).pathname;
+  const data = parse(await Deno.readTextFile(dataPath));
+  assertEquals(solve1(data), 11);
+  assertEquals(solve2(data), 31);
 });
