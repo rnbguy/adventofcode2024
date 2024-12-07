@@ -148,6 +148,8 @@ export function solve2(data: string[][]): number {
         break;
       }
       stepCount++;
+      // this is a hack - if guard has walked too many steps, he may be in a loop.
+      // we should rather check guard's location is visited with same direction
       if (stepCount > 2 * locations.length) {
         return true;
       }
