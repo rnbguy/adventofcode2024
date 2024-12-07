@@ -21,7 +21,7 @@ jobs:
       - uses: hrishikesh-kadam/setup-lcov@v1
       - uses: zgosalvez/github-actions-report-lcov@v3
         with:
-          coverage-files: cov.lcov
+          coverage-files: cov_profile/cov.lcov
           minimum-coverage: 60
           github-token: ${{ secrets.GITHUB_TOKEN }}
           update-comment: true
