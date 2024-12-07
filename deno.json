@@ -1,5 +1,15 @@
 {
   "workspace": ["./day*"],
+  "tasks": {
+    "test": {
+      "description": "Run tests",
+      "command": "deno test --allow-read"
+    },
+    "lcov": {
+      "description": "Generate LCOV report",
+      "command": "rm -rf cov_profile && deno test --allow-read --coverage=cov_profile && deno coverage --lcov --output=cov_profile/cov.lcov cov_profile"
+    }
+  },
   "imports": {
     "@std/assert": "jsr:@std/assert@1"
   }
