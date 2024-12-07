@@ -4,7 +4,7 @@ export function parse(data: string): number[][] {
   );
 }
 
-function is_safe(report: number[]): boolean {
+function isSafe(report: number[]): boolean {
   const diffs = Array.from(
     { length: report.length - 1 },
     (_, i) => report[i + 1] - report[i],
@@ -20,7 +20,7 @@ function is_safe(report: number[]): boolean {
 }
 
 export function solve1(data: number[][]): number {
-  return data.filter(is_safe)
+  return data.filter(isSafe)
     .length;
 }
 
@@ -29,7 +29,7 @@ export function solve2(data: number[][]): number {
     Array.from(
       { length: report.length },
       (_, i) => report.slice(0, i).concat(report.slice(i + 1)),
-    ).some(is_safe)
+    ).some(isSafe)
   ).length;
 }
 
