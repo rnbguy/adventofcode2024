@@ -69,16 +69,16 @@ class Grid {
     const [x, y] = this.guard;
     const [dx, dy] = this.guardDirection;
 
-    const [x_, y_] = [x + dx, y + dy];
+    const [xNext, yNext] = [x + dx, y + dy];
 
-    if (this.isWall(x_, y_)) {
+    if (this.isWall(xNext, yNext)) {
       this.changeDirection();
       this.guardWalk();
     } else {
-      this.guard = [x_, y_];
+      this.guard = [xNext, yNext];
       {
         this.set(x, y, "X");
-        this.set(x_, y_, "^");
+        this.set(xNext, yNext, "^");
       }
     }
   }
@@ -87,7 +87,7 @@ class Grid {
     this.set(x, y, "#");
   }
 
-  x_locations(): number[][] {
+  xLocations(): number[][] {
     const locations = [];
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
@@ -101,16 +101,11 @@ class Grid {
 }
 
 function clone(data: string[][]): string[][] {
-  return data.map((row) => {
-    return row.slice();
-  });
+  return data.map((row) => row.slice());
 }
 
-export function parse(data_r: string): string[][] {
-  const data = data_r.trim();
-  return data.split("\n").map((line) => {
-    return line.split("");
-  });
+export function parse(data: string): string[][] {
+  return data.trim().split("\n").map((line) => line.split(""));
 }
 
 export function solve1(data: string[][]): number {
@@ -123,7 +118,7 @@ export function solve1(data: string[][]): number {
     }
   }
 
-  return grid.x_locations().length;
+  return grid.xLocations().length;
 }
 
 export function solve2(data: string[][]): number {
@@ -136,7 +131,7 @@ export function solve2(data: string[][]): number {
     }
   }
 
-  const locations = grid.x_locations();
+  const locations = grid.xLocations();
 
   return locations.filter(([x, y]) => {
     const grid = new Grid(clone(data));
@@ -148,6 +143,8 @@ export function solve2(data: string[][]): number {
         break;
       }
       stepCount++;
+      // this is a hack - if guard has walked too many steps, he may be in a loop.
+      // we should rather check guard's location is visited with same direction
       if (stepCount > 2 * locations.length) {
         return true;
       }
@@ -157,8 +154,8 @@ export function solve2(data: string[][]): number {
 }
 
 if (import.meta.main) {
-  const data_path = new URL("input.txt", import.meta.url).pathname;
-  const data = parse(await Deno.readTextFile(data_path));
+  const dataPath = new URL("input.txt", import.meta.url).pathname;
+  const data = parse(await Deno.readTextFile(dataPath));
   console.log(solve1(data));
   console.log(solve2(data));
 }

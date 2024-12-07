@@ -11,11 +11,11 @@ class Grid {
     this.grid = grid;
   }
 
-  x_len(): number {
+  width(): number {
     return this.grid[0].length;
   }
 
-  y_len(): number {
+  height(): number {
     return this.grid.length;
   }
 
@@ -23,7 +23,7 @@ class Grid {
     return this.grid[y]?.[x] ?? "";
   }
 
-  find_xmas_at(x: number, y: number): number {
+  findXMasAt(x: number, y: number): number {
     let count = 0;
 
     for (const dx of [-1, 0, 1]) {
@@ -46,32 +46,32 @@ class Grid {
     return count;
   }
 
-  is_x_mas_at(x: number, y: number): boolean {
-    return [-1, 1].some((d) => {
-      return this.get(x - d, y - d) + this.get(x, y) +
-          this.get(x + d, y + d) == MAS;
-    }) &&
-      [-1, 1].some((d) => {
-        return this.get(x - d, y + d) + this.get(x, y) +
-            this.get(x + d, y - d) == MAS;
-      });
+  isXAndMasAt(x: number, y: number): boolean {
+    return [-1, 1].some((d) =>
+      this.get(x - d, y - d) + this.get(x, y) +
+          this.get(x + d, y + d) == MAS
+    ) &&
+      [-1, 1].some((d) =>
+        this.get(x - d, y + d) + this.get(x, y) +
+            this.get(x + d, y - d) == MAS
+      );
   }
 
-  find_all_xmas(): number {
+  findAllXmas(): number {
     let count = 0;
-    for (let x = 0; x < this.x_len(); x++) {
-      for (let y = 0; y < this.y_len(); y++) {
-        count += this.find_xmas_at(x, y);
+    for (let x = 0; x < this.width(); x++) {
+      for (let y = 0; y < this.height(); y++) {
+        count += this.findXMasAt(x, y);
       }
     }
     return count;
   }
 
-  find_all_x_mas(): number {
+  findAllXAndMas(): number {
     let count = 0;
-    for (let y = 0; y < this.y_len(); y++) {
-      for (let x = 0; x < this.x_len(); x++) {
-        if (this.is_x_mas_at(x, y)) {
+    for (let y = 0; y < this.height(); y++) {
+      for (let x = 0; x < this.width(); x++) {
+        if (this.isXAndMasAt(x, y)) {
           count++;
         }
       }
@@ -82,17 +82,17 @@ class Grid {
 
 export function solve1(data: string[]): number {
   const grid = new Grid(data);
-  return grid.find_all_xmas();
+  return grid.findAllXmas();
 }
 
 export function solve2(data: string[]): number {
   const grid = new Grid(data);
-  return grid.find_all_x_mas();
+  return grid.findAllXAndMas();
 }
 
 if (import.meta.main) {
-  const data_path = new URL("input.txt", import.meta.url).pathname;
-  const data = parse(await Deno.readTextFile(data_path));
+  const dataPath = new URL("input.txt", import.meta.url).pathname;
+  const data = parse(await Deno.readTextFile(dataPath));
   console.log(solve1(data));
   console.log(solve2(data));
 }

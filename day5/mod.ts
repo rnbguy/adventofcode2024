@@ -91,7 +91,7 @@ class DirectedGraph {
     return false;
   }
 
-  topological_sort(): number[] {
+  topologicalSort(): number[] {
     const nodes: Set<number> = new Set();
 
     for (const [from, tos] of this.edges) {
@@ -129,14 +129,14 @@ class DirectedGraph {
     const result = [];
 
     while (parents.size > 0) {
-      const next_nodes = [...parents.entries()].find(([node, parent]) => {
-        return parent.size === 0;
-      });
-      if (next_nodes === undefined) {
+      const nextNodes = [...parents.entries()].find(([_, parent]) =>
+        parent.size === 0
+      );
+      if (nextNodes === undefined) {
         return [];
       }
 
-      const node = next_nodes[0];
+      const node = nextNodes[0];
 
       result.push(node);
       parents.delete(node);
@@ -155,12 +155,12 @@ class DirectedGraph {
 }
 
 export function parse(data: string): [number[][], number[][]] {
-  const [rules_s, pages_s, _] = data.trim().split("\n\n");
-  const rules = rules_s.split("\n").map((rule) =>
+  const [rulesStr, pagesStr] = data.trim().split("\n\n");
+  const rules = rulesStr.split("\n").map((rule) =>
     rule.split("|").map((r) => Number(r))
   );
 
-  const pages = pages_s.split("\n").map((page) => page.split(",").map(Number));
+  const pages = pagesStr.split("\n").map((page) => page.split(",").map(Number));
 
   return [rules, pages];
 }
@@ -170,9 +170,7 @@ export function solve1(data: [number[][], number[][]]): number {
 
   const dirGraph = new DirectedGraph();
 
-  rules.forEach(([from, to]) => {
-    dirGraph.addEdge(from, to);
-  });
+  rules.forEach(([from, to]) => dirGraph.addEdge(from, to));
 
   return pages.map((page) => {
     const pageGraph = dirGraph.restrict(new Set(page));
@@ -180,8 +178,8 @@ export function solve1(data: [number[][], number[][]]): number {
     for (let i = 0; i < page.length - 1; i++) {
       pageGraph.addEdge(page[i], page[i + 1]);
     }
-    const top_sort = pageGraph.topological_sort();
-    if (top_sort.length === 0) {
+    const topSort = pageGraph.topologicalSort();
+    if (topSort.length === 0) {
       return 0;
     } else {
       return page[(page.length - 1) / 2];
@@ -194,27 +192,23 @@ export function solve2(data: [number[][], number[][]]): number {
 
   const dirGraph = new DirectedGraph();
 
-  rules.forEach(([from, to]) => {
-    dirGraph.addEdge(from, to);
-  });
+  rules.forEach(([from, to]) => dirGraph.addEdge(from, to));
 
-  const topological_sort = dirGraph.topological_sort();
+  const topologicalSort = dirGraph.topologicalSort();
 
-  const topological_index = new Map<number, number>();
-  topological_sort.forEach((node, index) => {
-    topological_index.set(node, index);
-  });
+  const topologicalIndex = new Map<number, number>();
+  topologicalSort.forEach((node, index) => topologicalIndex.set(node, index));
 
   return pages.map((page) => {
     const pageGraph = dirGraph.restrict(new Set(page));
 
-    const fixed = pageGraph.topological_sort();
+    const fixed = pageGraph.topologicalSort();
 
     for (let i = 0; i < page.length - 1; i++) {
       pageGraph.addEdge(page[i], page[i + 1]);
     }
-    const top_sort = pageGraph.topological_sort();
-    if (top_sort.length === 0) {
+    const topSort = pageGraph.topologicalSort();
+    if (topSort.length === 0) {
       return fixed[(fixed.length - 1) / 2];
     } else {
       return 0;
@@ -223,8 +217,8 @@ export function solve2(data: [number[][], number[][]]): number {
 }
 
 if (import.meta.main) {
-  const data_path = new URL("input.txt", import.meta.url).pathname;
-  const data = parse(await Deno.readTextFile(data_path));
+  const dataPath = new URL("input.txt", import.meta.url).pathname;
+  const data = parse(await Deno.readTextFile(dataPath));
   console.log(solve1(data));
   console.log(solve2(data));
 }
