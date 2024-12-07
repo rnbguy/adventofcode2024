@@ -106,9 +106,8 @@ function clone(data: string[][]): string[][] {
   });
 }
 
-export function parse(data_r: string): string[][] {
-  const data = data_r.trim();
-  return data.split("\n").map((line) => {
+export function parse(data: string): string[][] {
+  return data.trim().split("\n").map((line) => {
     return line.split("");
   });
 }

@@ -1,6 +1,5 @@
-export function parse(data_r: string): [number, number[]][] {
-  const data = data_r.trim();
-  return data.split("\n").map((line) => {
+export function parse(data: string): [number, number[]][] {
+  return data.trim().split("\n").map((line) => {
     const [a, b] = line.split(":");
     return [Number(a.trim()), b.trim().split(" ").map(Number)];
   });
