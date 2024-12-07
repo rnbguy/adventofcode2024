@@ -16,9 +16,8 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: |
-          deno test --allow-read --coverage=cov_profile
-          deno coverage --lcov --output=cov.lcov cov_profile
+      - run: deno task test
+      - run: deno task lcov
       - uses: hrishikesh-kadam/setup-lcov@v1
       - uses: zgosalvez/github-actions-report-lcov@v3
         with:
