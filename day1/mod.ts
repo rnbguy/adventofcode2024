@@ -1,10 +1,10 @@
 export function parse(data: string): number[][] {
   const parsed = data.trim().split("\n").map((x) =>
-    x.split(" ").map((x) => parseInt(x))
+    // 3 spaces between the numbers
+    x.split("   ").map((x) => parseInt(x))
   );
   return parsed
-    // Three spaces are used to separate the numbers
-    .map((x) => [x[0], x[3]]);
+    .map((x) => [x[0], x[1]]);
 }
 
 export function solve1(data: number[][]): number {
