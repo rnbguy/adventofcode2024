@@ -44,17 +44,17 @@ function solve2Rec(value: number, remaining: number[]): boolean {
 }
 
 export function solve1(data: [number, number[]][]): number {
-  return data.filter((ecase) => {
+  return data.filter((ecase) =>
     // reverse will reverse the array in place too
-    return solve1Rec(ecase[0], ecase[1].slice().reverse());
-  }).reduce((acc, [value, _]) => acc + value, 0);
+    solve1Rec(ecase[0], ecase[1].slice().reverse())
+  ).reduce((acc, [value, _]) => acc + value, 0);
 }
 
 export function solve2(data: [number, number[]][]): number {
-  return data.filter((ecase) => {
+  return data.filter((ecase) =>
     // reverse will reverse the array in place too
-    return solve2Rec(ecase[0], ecase[1].slice().reverse());
-  }).reduce((acc, [value, _]) => acc + value, 0);
+    solve2Rec(ecase[0], ecase[1].slice().reverse())
+  ).reduce((acc, [value, _]) => acc + value, 0);
 }
 
 if (import.meta.main) {

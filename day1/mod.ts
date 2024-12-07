@@ -34,9 +34,7 @@ export function solve2(data: number[][]): number {
   );
 
   return left_nums.reduce(
-    (acc, x) => {
-      return acc + (x * (right_count[x] || 0));
-    },
+    (acc, x) => acc + (x * (right_count[x] || 0)),
     0,
   );
 }

@@ -101,15 +101,11 @@ class Grid {
 }
 
 function clone(data: string[][]): string[][] {
-  return data.map((row) => {
-    return row.slice();
-  });
+  return data.map((row) => row.slice());
 }
 
 export function parse(data: string): string[][] {
-  return data.trim().split("\n").map((line) => {
-    return line.split("");
-  });
+  return data.trim().split("\n").map((line) => line.split(""));
 }
 
 export function solve1(data: string[][]): number {

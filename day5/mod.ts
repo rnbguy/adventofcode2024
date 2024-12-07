@@ -129,9 +129,9 @@ class DirectedGraph {
     const result = [];
 
     while (parents.size > 0) {
-      const next_nodes = [...parents.entries()].find(([node, parent]) => {
-        return parent.size === 0;
-      });
+      const next_nodes = [...parents.entries()].find(([_, parent]) =>
+        parent.size === 0
+      );
       if (next_nodes === undefined) {
         return [];
       }
@@ -170,9 +170,7 @@ export function solve1(data: [number[][], number[][]]): number {
 
   const dirGraph = new DirectedGraph();
 
-  rules.forEach(([from, to]) => {
-    dirGraph.addEdge(from, to);
-  });
+  rules.forEach(([from, to]) => dirGraph.addEdge(from, to));
 
   return pages.map((page) => {
     const pageGraph = dirGraph.restrict(new Set(page));
@@ -194,16 +192,12 @@ export function solve2(data: [number[][], number[][]]): number {
 
   const dirGraph = new DirectedGraph();
 
-  rules.forEach(([from, to]) => {
-    dirGraph.addEdge(from, to);
-  });
+  rules.forEach(([from, to]) => dirGraph.addEdge(from, to));
 
   const topological_sort = dirGraph.topological_sort();
 
   const topological_index = new Map<number, number>();
-  topological_sort.forEach((node, index) => {
-    topological_index.set(node, index);
-  });
+  topological_sort.forEach((node, index) => topological_index.set(node, index));
 
   return pages.map((page) => {
     const pageGraph = dirGraph.restrict(new Set(page));

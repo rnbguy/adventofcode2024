@@ -2,17 +2,15 @@ export const regex1 = /mul\(([0-9]{1,3}),([0-9]{1,3})\)/g;
 export const regex2 = /do(?:n't)?\(\)|mul\(([0-9]{1,3}),([0-9]{1,3})\)/g;
 
 export function solve1(data: string): number {
-  return data.matchAll(regex1).map((match) => {
-    const [_, a, b] = match;
-    return Number(a) * Number(b);
-  }).reduce((acc, val) => acc + val, 0);
+  return data.matchAll(regex1).map(([_, a, b]) => Number(a) * Number(b)).reduce(
+    (acc, val) => acc + val,
+    0,
+  );
 }
 
 export function solve2(data: string): number {
   let is_enabled = true;
-  return data.matchAll(regex2).map((match) => {
-    const [m, a, b] = match;
-
+  return data.matchAll(regex2).map(([m, a, b]) => {
     if (m === "do()") {
       is_enabled = true;
       return 0;

@@ -47,14 +47,14 @@ class Grid {
   }
 
   is_x_mas_at(x: number, y: number): boolean {
-    return [-1, 1].some((d) => {
-      return this.get(x - d, y - d) + this.get(x, y) +
-          this.get(x + d, y + d) == MAS;
-    }) &&
-      [-1, 1].some((d) => {
-        return this.get(x - d, y + d) + this.get(x, y) +
-            this.get(x + d, y - d) == MAS;
-      });
+    return [-1, 1].some((d) =>
+      this.get(x - d, y - d) + this.get(x, y) +
+          this.get(x + d, y + d) == MAS
+    ) &&
+      [-1, 1].some((d) =>
+        this.get(x - d, y + d) + this.get(x, y) +
+            this.get(x + d, y - d) == MAS
+      );
   }
 
   find_all_xmas(): number {
