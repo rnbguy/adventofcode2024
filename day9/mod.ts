@@ -47,8 +47,53 @@ export function solve1(rdata: number[]): number {
   return count;
 }
 
-export function solve2(data: number[]): number {
-  return data.length;
+export function solve2(rdata: number[]): number {
+  const data = rdata.slice();
+
+  let disk = new Array<[number, number, number]>();
+
+  for (let i = 0; i * 2 < data.length; i++) {
+    // id, idSize, spaceAfter
+    disk.push([i, data[i * 2], data[i * 2 + 1] ?? 0]);
+  }
+
+  for (let i = (data.length - 1) / 2; 0 <= i; i--) {
+    const indexI = disk.findIndex(([id, _size, _space]) => id === i)!;
+    const [idI, sizeI, _spaceI] = disk.at(indexI)!;
+    disk.reverse();
+    const newDisk = new Array<[number, number, number]>();
+    while (disk.length > 0) {
+      const [idJ, sizeJ, spaceJ] = disk.pop()!;
+      if (newDisk.length < indexI && spaceJ >= sizeI) {
+        newDisk.push([idJ, sizeJ, 0]);
+        newDisk.push([idI, sizeI, spaceJ - sizeI]);
+        while (disk.length > 0) {
+          const [idK, sizeK, spaceK] = disk.pop()!;
+          if (idK === idI) {
+            const [idL, sizeL, spaceL] = newDisk.pop()!;
+            newDisk.push([idL, sizeL, spaceL + sizeK + spaceK]);
+          } else {
+            newDisk.push([idK, sizeK, spaceK]);
+          }
+        }
+        break;
+      } else {
+        newDisk.push([idJ, sizeJ, spaceJ]);
+      }
+    }
+    disk = newDisk;
+  }
+
+  let index = 0;
+  let count = 0;
+
+  for (const [id, idSize, spaceAfter] of disk) {
+    count += id * ((idSize * index) + (((idSize - 1) * idSize) / 2));
+
+    index += idSize + spaceAfter;
+  }
+
+  return count;
 }
 
 if (import.meta.main) {
