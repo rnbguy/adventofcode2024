@@ -4,6 +4,6 @@ import { parse, solve1, solve2 } from "./mod.ts";
 Deno.test(async function testExample() {
   const dataPath = new URL("example.txt", import.meta.url).pathname;
   const data = parse(await Deno.readTextFile(dataPath));
-  assertEquals(solve1(data), 2);
-  assertEquals(solve2(data), 2);
+  assertEquals(solve1(data), 55312);
+  assertEquals(solve2(data), 65601038650482);
 });
