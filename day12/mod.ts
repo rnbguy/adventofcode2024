@@ -70,9 +70,10 @@ export function solve1(data: number[][]): number {
     const area = region.length;
     const perimeter = region.map((node) => 4 - adjMap.get(node)!.length).reduce(
       (a, b) => a + b,
+      0,
     );
     return [area, perimeter];
-  }).map(([area, perimeter]) => area * perimeter).reduce((a, b) => a + b);
+  }).map(([area, perimeter]) => area * perimeter).reduce((a, b) => a + b, 0);
 }
 
 export function solve2(data: number[][]): number {

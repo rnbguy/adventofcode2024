@@ -26,7 +26,11 @@ function solve(data: number[], nBlink: number): number {
       return 1;
     }
 
-    if (mm.has(x) && mm.get(x)!.has(n)) {
+    if (!mm.has(x)) {
+      mm.set(x, new Map<number, number>());
+    }
+
+    if (mm.get(x)!.has(n)) {
       return mm.get(x)!.get(n)!;
     }
 
@@ -34,10 +38,6 @@ function solve(data: number[], nBlink: number): number {
 
     for (const y of transform(x)) {
       count += blink(y, n - 1);
-    }
-
-    if (!mm.has(x)) {
-      mm.set(x, new Map<number, number>());
     }
 
     mm.get(x)!.set(n, count);
