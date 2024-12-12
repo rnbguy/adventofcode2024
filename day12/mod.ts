@@ -6,8 +6,10 @@ export function parse(data: string): number[][] {
   );
 }
 
-export function solve1(data: number[][]): number {
+export function solve(data: number[][]): [number, number, number, number][] {
   const adjMap = new Map<string, string[]>();
+  const convexCorner = new Map<string, number>();
+  const concaveCorner = new Map<string, number>();
 
   function getPlot([i, j]: [number, number]): number {
     if (0 <= i && i < data.length && 0 <= j && j < data[i].length) {
@@ -38,7 +40,31 @@ export function solve1(data: number[][]): number {
           adj.push(`${ni},${nj}`);
         });
 
+      const [convexCount, concaveCount] = [[-1, 1], [1, 1], [1, -1], [-1, -1]]
+        .map(([di, dj]) => {
+          const [ni, nj] = [i + di, j + dj];
+          const [ki, kj] = [i + di, j];
+          const [li, lj] = [i, j + dj];
+
+          return [
+            // convex corner. e.g. if looking at top-left corner, it's a convex corner
+            // if the top and left are different regions
+            !isRegion([i, j], [ki, kj]) && !isRegion([i, j], [li, lj]),
+            // concave corner. e.g. if looking at top-left corner, it's a concave corner
+            // if the top and left are the same region
+            // but the top-left is a different region
+            isRegion([i, j], [ki, kj]) && isRegion([i, j], [li, lj]) &&
+            !isRegion([i, j], [ni, nj]),
+          ];
+        }).reduce(([convexCount, concaveCount], [isConvex, isConcave]) => {
+          if (isConvex) convexCount++;
+          if (isConcave) concaveCount++;
+          return [convexCount, concaveCount];
+        }, [0, 0]);
+
       adjMap.set(`${i},${j}`, adj);
+      convexCorner.set(`${i},${j}`, convexCount);
+      concaveCorner.set(`${i},${j}`, concaveCount);
     }
   }
 
@@ -72,12 +98,30 @@ export function solve1(data: number[][]): number {
       (a, b) => a + b,
       0,
     );
-    return [area, perimeter];
-  }).map(([area, perimeter]) => area * perimeter).reduce((a, b) => a + b, 0);
+    const convexCornerCount = region.map((node) => convexCorner.get(node)!)
+      .reduce((a, b) => a + b, 0);
+    const concaveCornerCount = region.map((node) => concaveCorner.get(node)!)
+      .reduce((a, b) => a + b, 0);
+    return [area, perimeter, convexCornerCount, concaveCornerCount];
+  });
+}
+
+export function solve1(data: number[][]): number {
+  return solve(data).reduce(
+    (price, [area, perimeter, _convexCornerCount, _concaveCornerCount]) => {
+      return price + area * perimeter;
+    },
+    0,
+  );
 }
 
 export function solve2(data: number[][]): number {
-  return data.length * data[0].length;
+  return solve(data).reduce(
+    (price, [area, _perimeter, convexCornerCount, concaveCornerCount]) => {
+      return price + area * (convexCornerCount + concaveCornerCount);
+    },
+    0,
+  );
 }
 
 if (import.meta.main) {
