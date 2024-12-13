@@ -20,10 +20,43 @@ class Game {
     this.b = b;
     this.p = p;
   }
+
+  solve(): [number, number] {
+    // return X such that
+    // X * [A^T | B^T] = P
+    // X = P * [A^T | B^T]^-1
+
+    const A = this.a;
+    const B = this.b;
+    const P = this.p;
+
+    // solve for X
+
+    const determinant = A[0] * B[1] - A[1] * B[0];
+
+    const AB_inv_div_det = [[B[1], -B[0]], [-A[1], A[0]]];
+
+    const X_div_det = [
+      P[0] * AB_inv_div_det[0][0] + P[1] * AB_inv_div_det[0][1],
+      P[0] * AB_inv_div_det[1][0] + P[1] * AB_inv_div_det[1][1],
+    ];
+
+    if (
+      determinant !== 0 &&
+      X_div_det[0] % determinant === 0 &&
+      X_div_det[1] % determinant === 0
+    ) {
+      return [X_div_det[0] / determinant, X_div_det[1] / determinant];
+    } else {
+      return [-1, -1];
+    }
+  }
 }
 
 export function solve1(data: Game[]): number {
-  return data.length;
+  return data.map((game) => game.solve()).filter(([x, y]) =>
+    0 <= x && x <= 100 && 0 <= y && y <= 100
+  ).map(([x, y]) => x * 3 + y).reduce((a, b) => a + b, 0);
 }
 
 export function solve2(data: Game[]): number {
