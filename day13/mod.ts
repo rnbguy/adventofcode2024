@@ -1,6 +1,8 @@
 const PATTERN =
   /Button A: X\+(\d+), Y\+(\d+)\nButton B: X\+(\d+), Y\+(\d+)\nPrize: X=(\d+), Y=(\d+)/;
 
+const OFFSET = 10000000000000;
+
 export function parse(data: string): Game[] {
   return data.trim().split("\n\n").map((game) => {
     const [_m, ax, ay, bx, by, px, py] = game.match(PATTERN)!;
@@ -19,6 +21,10 @@ class Game {
     this.a = a;
     this.b = b;
     this.p = p;
+  }
+
+  correct(): Game {
+    return new Game(this.a, this.b, [this.p[0] + OFFSET, this.p[1] + OFFSET]);
   }
 
   solve(): [number, number] {
@@ -60,7 +66,9 @@ export function solve1(data: Game[]): number {
 }
 
 export function solve2(data: Game[]): number {
-  return data.length;
+  return data.map((game) => game.correct().solve()).filter(([x, y]) =>
+    0 <= x && 0 <= y
+  ).map(([x, y]) => x * 3 + y).reduce((a, b) => a + b, 0);
 }
 
 if (import.meta.main) {
