@@ -85,19 +85,19 @@ function printGrid(data: [Vec, Vec][], duration: number) {
 export function solve2(data: [Vec, Vec][]): number {
   // min_index(i) solve(data, i)
 
-  let minSafety = Infinity;
-  let minDuration = 0;
-
-  // this loop can be optimized by keeping
-  // track of a visited set of the grid config.
-  // but 10000 iterations work fine for the input.
-  for (let i = 0; i < 10000; i++) {
-    const safety = solve(data, i);
-    if (safety < minSafety) {
-      minSafety = safety;
-      minDuration = i;
-    }
-  }
+  // this iteration can be optimized by keeping
+  // track of a visited the grid config.
+  // but this brute force works fine for the input.
+  const { minDuration } = Array.from({ length: 10000 }).reduce(
+    ({ minSafety, minDuration }, _, i) => {
+      const safety = solve(data, i);
+      if (safety < minSafety) {
+        return { minSafety: safety, minDuration: i };
+      }
+      return { minSafety, minDuration };
+    },
+    { minSafety: Infinity, minDuration: 0 },
+  );
 
   if (import.meta.main) {
     printGrid(data, minDuration);
