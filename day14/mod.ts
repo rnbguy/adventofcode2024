@@ -45,8 +45,65 @@ export function solve1(data: [Vec, Vec][]): number {
   return solve(data, 100);
 }
 
+function printGrid(data: [Vec, Vec][], duration: number) {
+  let [width, height] = data.reduce(
+    ([w, h], [[x, y], _vel]) => [Math.max(w, x), Math.max(h, y)],
+    [0, 0],
+  );
+
+  width += 1;
+  height += 1;
+
+  const posAfterDur = data.map(([[x, y], [vx, vy]]) => {
+    let x_ = (x + vx * duration) % width;
+    if (x_ < 0) x_ += width;
+    let y_ = (y + vy * duration) % height;
+    if (y_ < 0) y_ += height;
+    return [[x_, y_], [vx, vy]];
+  });
+
+  const countAtPos = new Map<string, number>();
+
+  posAfterDur.forEach(([x, y]) => {
+    const key = `${x},${y}`;
+    countAtPos.set(key, (countAtPos.get(key) || 0) + 1);
+  });
+
+  const grid = Array.from(
+    { length: height },
+    () => Array.from({ length: width }, () => "."),
+  );
+
+  countAtPos.forEach((count, key) => {
+    const [x, y] = key.split(",").map(Number);
+    grid[y][x] = count > 10 ? "#" : count.toString();
+  });
+
+  console.log(grid.map((row) => row.join("")).join("\n"));
+}
+
 export function solve2(data: [Vec, Vec][]): number {
-  return data.length;
+  // min_index(i) solve(data, i)
+
+  let minSafety = Infinity;
+  let minDuration = 0;
+
+  // this loop can be optimized by keeping
+  // track of a visited set of the grid config.
+  // but 10000 iterations work fine for the input.
+  for (let i = 0; i < 10000; i++) {
+    const safety = solve(data, i);
+    if (safety < minSafety) {
+      minSafety = safety;
+      minDuration = i;
+    }
+  }
+
+  if (import.meta.main) {
+    printGrid(data, minDuration);
+  }
+
+  return minDuration;
 }
 
 if (import.meta.main) {
