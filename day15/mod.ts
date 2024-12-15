@@ -30,7 +30,9 @@ export function parse(data: string): [Pos[][], Move[]] {
   return [grid, moves];
 }
 
-export function solve1([grid, moves]: [Pos[][], Move[]]): number {
+export function solve1([gridr, moves]: [Pos[][], Move[]]): number {
+  const grid = gridr.map((row) => row.slice());
+
   const height = grid.length;
   const width = grid[0].length;
 
@@ -103,8 +105,192 @@ export function solve1([grid, moves]: [Pos[][], Move[]]): number {
   return count;
 }
 
-export function solve2([grid, moves]: [Pos[][], Move[]]): number {
-  return grid.length * grid[0].length * moves.length;
+export function solve2([oldGrid, moves]: [Pos[][], Move[]]): number {
+  const grid = oldGrid.map((row) =>
+    row.map((cell) => {
+      switch (cell) {
+        case "#":
+          return ["#", "#"];
+        case "O":
+          return ["[", "]"];
+        case ".":
+          return [".", "."];
+        case "@":
+          return ["@", "."];
+        default:
+          throw new Error("Invalid cell");
+      }
+    }).flat()
+  );
+
+  const height = grid.length;
+  const width = grid[0].length;
+
+  let robotPos = { x: 0, y: 0 };
+  grid.forEach((row, y) => {
+    row.forEach((cell, x) => {
+      if (cell === "@") {
+        robotPos = { x, y };
+      }
+    });
+  });
+
+  function moveRel(
+    { x, y }: { x: number; y: number },
+    { dx, dy }: { dx: number; dy: number },
+    dryRun: boolean,
+  ): boolean {
+    const sourceCell = grid[y][x];
+
+    assert(sourceCell !== "]");
+
+    if (y + dy < 0 || y + dy >= height || x + dx < 0 || x + dx >= width) {
+      return false;
+    }
+
+    if (sourceCell === "#") {
+      return false;
+    }
+
+    if (sourceCell === ".") {
+      return true;
+    }
+
+    if (sourceCell === "@") {
+      const targetCell = grid[y + dy][x + dx];
+      if (targetCell === "#") {
+        return false;
+      }
+
+      if (targetCell === ".") {
+        if (!dryRun) {
+          grid[y + dy][x + dx] = "@";
+          grid[y][x] = ".";
+        }
+        return true;
+      }
+
+      // if box
+      if (
+        targetCell === "[" &&
+        moveRel({ x: x + dx, y: y + dy }, { dx, dy }, dryRun)
+      ) {
+        if (!dryRun) {
+          grid[y + dy][x + dx] = "@";
+          grid[y][x] = ".";
+        }
+        return true;
+      }
+
+      // always move front of box
+      if (
+        targetCell === "]" &&
+        moveRel({ x: x - 1 + dx, y: y + dy }, { dx, dy }, dryRun)
+      ) {
+        if (!dryRun) {
+          grid[y + dy][x + dx] = "@";
+          grid[y][x] = ".";
+        }
+        return true;
+      }
+    }
+
+    // if box
+    if (sourceCell === "[") {
+      assert(grid[y][x + 1] === "]");
+
+      const newPos = [{ x: x + dx, y: y + dy }, { x: x + 1 + dx, y: y + dy }]
+        .filter((nXY) =>
+          [{ x, y }, { x: x + 1, y }].every((xy) =>
+            xy.x !== nXY.x || xy.y !== nXY.y
+          )
+        );
+
+      if (newPos.some((pos) => grid[pos.y][pos.x] === "#")) {
+        return false;
+      }
+
+      const oldPos = [{ x, y }, { x: x + 1, y }];
+
+      if (newPos.every((pos) => grid[pos.y][pos.x] === ".")) {
+        if (!dryRun) {
+          oldPos.forEach((pos) => grid[pos.y][pos.x] = ".");
+          grid[y + dy][x + dx] = "[";
+          grid[y + dy][x + 1 + dx] = "]";
+        }
+        return true;
+      }
+
+      const newBoxPos = newPos.map((pos) => {
+        if (grid[pos.y][pos.x] === "]") {
+          return { x: pos.x - 1, y: pos.y };
+        } else {
+          return pos;
+        }
+      });
+
+      assert(newBoxPos.length <= 2);
+      assert(newBoxPos.length > 0);
+
+      const finalNexBoxPos = [];
+
+      if (newBoxPos.length === 1) {
+        finalNexBoxPos.push(newBoxPos[0]!);
+      } else if (
+        newBoxPos[0]!.x == newBoxPos[1]!.x && newBoxPos[0]!.y == newBoxPos[1]!.y
+      ) {
+        finalNexBoxPos.push(newBoxPos[0]!);
+      } else {
+        finalNexBoxPos.push(newBoxPos[0]!);
+        finalNexBoxPos.push(newBoxPos[1]!);
+      }
+
+      assert(finalNexBoxPos.every((pos) => grid[pos.y][pos.x] !== "]"));
+
+      if (finalNexBoxPos.every((pos) => moveRel(pos, { dx, dy }, true))) {
+        if (!dryRun) {
+          finalNexBoxPos.forEach((pos) => moveRel(pos, { dx, dy }, false));
+          oldPos.forEach((pos) => grid[pos.y][pos.x] = ".");
+          grid[y + dy][x + dx] = "[";
+          grid[y + dy][x + 1 + dx] = "]";
+        }
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  for (const move of moves) {
+    switch (move) {
+      case "^":
+        if (moveRel(robotPos, { dy: -1, dx: 0 }, false)) robotPos.y--;
+        break;
+      case "v":
+        if (moveRel(robotPos, { dy: 1, dx: 0 }, false)) robotPos.y++;
+        break;
+      case "<":
+        if (moveRel(robotPos, { dy: 0, dx: -1 }, false)) robotPos.x--;
+        break;
+      case ">":
+        if (moveRel(robotPos, { dy: 0, dx: 1 }, false)) robotPos.x++;
+        break;
+    }
+  }
+
+  assert(grid[robotPos.y][robotPos.x] === "@");
+
+  let count = 0;
+
+  grid.forEach((row, y) => {
+    row.forEach((cell, x) => {
+      if (cell === "[") {
+        count += (y + 1) * 100 + (x + 2);
+      }
+    });
+  });
+
+  return count;
 }
 
 if (import.meta.main) {
