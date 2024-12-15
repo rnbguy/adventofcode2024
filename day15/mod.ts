@@ -210,11 +210,13 @@ export function solve2([oldGrid, moves]: [Pos[][], Move[]]): number {
         return false;
       }
 
-      const oldPos = [{ x, y }, { x: x + 1, y }];
-
       if (newPos.every((pos) => grid[pos.y][pos.x] === ".")) {
         if (!dryRun) {
-          oldPos.forEach((pos) => grid[pos.y][pos.x] = ".");
+          // pick up the box
+          grid[y][x] = ".";
+          grid[y][x + 1] = ".";
+          // put back the box at new position
+          // note: old and new position may overlap
           grid[y + dy][x + dx] = "[";
           grid[y + dy][x + 1 + dx] = "]";
         }
@@ -232,6 +234,7 @@ export function solve2([oldGrid, moves]: [Pos[][], Move[]]): number {
       assert(newBoxPos.length <= 2);
       assert(newBoxPos.length > 0);
 
+      // could have used a Set here
       const finalNexBoxPos = [];
 
       if (newBoxPos.length === 1) {
@@ -250,7 +253,11 @@ export function solve2([oldGrid, moves]: [Pos[][], Move[]]): number {
       if (finalNexBoxPos.every((pos) => moveRel(pos, { dx, dy }, true))) {
         if (!dryRun) {
           finalNexBoxPos.forEach((pos) => moveRel(pos, { dx, dy }, false));
-          oldPos.forEach((pos) => grid[pos.y][pos.x] = ".");
+          // pick up the box
+          grid[y][x] = ".";
+          grid[y][x + 1] = ".";
+          // put back the box at new position
+          // note: old and new position may overlap
           grid[y + dy][x + dx] = "[";
           grid[y + dy][x + 1 + dx] = "]";
         }
