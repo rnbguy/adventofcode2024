@@ -1,4 +1,5 @@
 import { BinaryHeap } from "jsr:@std/data-structures";
+import { assert } from "jsr:@std/assert";
 
 type Elem = "S" | "E" | "." | "#";
 const DIRS = ["0,-1", "1,0", "0,1", "-1,0"];
@@ -61,19 +62,17 @@ export function solve1(data: Elem[][]): number {
     const dirIndex = DIRS.indexOf(dir);
 
     const currentDir = dir.split(",").map(Number);
-    const leftDir = DIRS[(dirIndex + 3) % DIRS.length].split(",").map(Number);
-    const rightDir = DIRS[(dirIndex + 1) % DIRS.length].split(",").map(Number);
 
     const nextPos: [number, [number, number], string][] = [
       [score + 1, [x + currentDir[0], y + currentDir[1]], dir],
       [
-        score + 1001,
-        [x + leftDir[0], y + leftDir[1]],
-        DIRS[(dirIndex + 3) % DIRS.length],
+        score + 1000,
+        [x, y],
+        DIRS[(dirIndex + DIRS.length - 1) % DIRS.length],
       ],
       [
-        score + 1001,
-        [x + rightDir[0], y + rightDir[1]],
+        score + 1000,
+        [x, y],
         DIRS[(dirIndex + 1) % DIRS.length],
       ],
     ];
@@ -94,7 +93,6 @@ export function solve1(data: Elem[][]): number {
   );
 }
 
-// FIXME: too slow on input.txt
 export function solve2(data: Elem[][]): number {
   const height = data.length;
   const width = data[0].length;
@@ -113,10 +111,11 @@ export function solve2(data: Elem[][]): number {
     }
   }
 
-  const bestSpots = new Map<string, number>();
+  const pruneMap = new Map<string, number>();
+  const bestSpots = new Set<string>();
 
   for (const dir of DIRS) {
-    bestSpots.set(`${end[0]},${end[1]}|${dir}`, 0);
+    bestSpots.add(`${end[0]},${end[1]}|${dir}`);
   }
 
   function isBestSpot(
@@ -128,30 +127,31 @@ export function solve2(data: Elem[][]): number {
 
     const key = `${x},${y}|${dir}`;
 
-    if (bestSpots.has(key)) {
-      if (bestSpots.get(key)! === 0) return true;
-      if (bestSpots.get(key)! >= gas) return false;
-    }
+    if (pruneMap.has(key) && gas < pruneMap.get(key)!) return false;
+
+    if (bestSpots.has(key)) return true;
+
+    if (pruneMap.has(key) && gas === pruneMap.get(key)!) return false;
 
     const dirIndex = DIRS.indexOf(dir);
 
     const currentDir = dir.split(",").map(Number);
-    const leftDir = DIRS[(dirIndex + 3) % DIRS.length].split(",").map(Number);
-    const rightDir = DIRS[(dirIndex + 1) % DIRS.length].split(",").map(Number);
 
     const nextPos: [number, [number, number], string][] = [
       [gas - 1, [x + currentDir[0], y + currentDir[1]], dir],
       [
-        gas - 1001,
-        [x + leftDir[0], y + leftDir[1]],
-        DIRS[(dirIndex + 3) % DIRS.length],
+        gas - 1000,
+        [x, y],
+        DIRS[(dirIndex + DIRS.length - 1) % DIRS.length],
       ],
       [
-        gas - 1001,
-        [x + rightDir[0], y + rightDir[1]],
+        gas - 1000,
+        [x, y],
         DIRS[(dirIndex + 1) % DIRS.length],
       ],
     ];
+
+    pruneMap.set(key, gas);
 
     // note: it's .map(f).some((v) => v), not .some(f)
     // because, we want to perform dfs on every neighbor
@@ -161,22 +161,20 @@ export function solve2(data: Elem[][]): number {
       ).some((v) => v);
 
     if (ans) {
-      bestSpots.set(key, 0);
-    } else {
-      bestSpots.set(key, gas);
+      bestSpots.add(key);
     }
 
     return ans;
   }
 
   const maxGas = solve1(data);
-  isBestSpot(start, "1,0", maxGas);
+  assert(isBestSpot(start, "1,0", maxGas));
 
-  return new Set(
-    bestSpots.entries().filter(([_k, value]) => value === 0).map(([k]) =>
-      k.split("|")[0]
-    ),
-  ).size;
+  const bestSpotScalar = new Set(
+    bestSpots.values().map((key) => key.split("|")[0]),
+  );
+
+  return bestSpotScalar.size;
 }
 
 if (import.meta.main) {
