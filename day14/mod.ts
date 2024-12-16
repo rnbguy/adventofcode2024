@@ -83,12 +83,26 @@ function printGrid(data: [Vec, Vec][], duration: number) {
 }
 
 export function solve2(data: [Vec, Vec][]): number {
-  // min_index(i) solve(data, i)
+  // min(i, key = solve(data, i))
 
-  // this iteration can be optimized by keeping
-  // track of a visited the grid config.
-  // but this brute force works fine for the input.
-  const { minDuration } = Array.from({ length: 10000 }).reduce(
+  let [width, height] = data.reduce(
+    ([w, h], [[x, y], _vel]) => [Math.max(w, x), Math.max(h, y)],
+    [0, 0],
+  );
+
+  width += 1;
+  height += 1;
+
+  // x_ = (x + vx * duration) % width
+  // y_ = (y + vy * duration) % height
+  //
+  // so at duration = (width * height), x_ = x, y_ = y
+  // e.g. it returns to the original position
+  // creating a loop in the grid configuration.
+  // so we need to iterate only till loopOrder
+  const loopOrder = width * height;
+
+  const { minDuration } = Array.from({ length: loopOrder }).reduce(
     ({ minSafety, minDuration }, _, i) => {
       const safety = solve(data, i);
       if (safety < minSafety) {
