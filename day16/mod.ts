@@ -163,7 +163,7 @@ export function solve2(data: Elem[][]): number {
     if (ans) {
       bestSpots.set(key, 0);
     } else {
-      bestSpots.set(key, Math.max(bestSpots.get(key)!, gas));
+      bestSpots.set(key, gas);
     }
 
     return ans;
