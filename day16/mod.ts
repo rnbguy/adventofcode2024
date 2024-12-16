@@ -101,6 +101,7 @@ export function solve1(data: Elem[][]): number {
   );
 }
 
+// FIXME: too slow on input.txt
 export function solve2(data: Elem[][]): number {
   const height = data.length;
   const width = data[0].length;
