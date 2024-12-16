@@ -1,7 +1,7 @@
 import { BinaryHeap } from "jsr:@std/data-structures";
 
 type Elem = "S" | "E" | "." | "#";
-const DIRS = ["N", "E", "S", "W"];
+const DIRS = ["0,-1", "1,0", "0,1", "-1,0"];
 
 export function parse(data: string): Elem[][] {
   return data.trim().split("\n").map((line) => line.trim().split("") as Elem[]);
@@ -47,7 +47,7 @@ export function solve1(data: Elem[][]): number {
     a[0] - b[0]
   );
 
-  heap.push([0, start, "E"]);
+  heap.push([0, start, "1,0"]);
 
   while (heap.length > 0) {
     const [score, [x, y], dir] = heap.pop()!;
@@ -58,32 +58,25 @@ export function solve1(data: Elem[][]): number {
       return score;
     }
 
-    const nextPos: [number, [number, number], string][] = [];
-
     const dirIndex = DIRS.indexOf(dir);
 
-    nextPos.push([score + 1000, [x, y], DIRS[(dirIndex + 1) % DIRS.length]]);
-    nextPos.push([score + 2000, [x, y], DIRS[(dirIndex + 2) % DIRS.length]]);
-    nextPos.push([score + 1000, [x, y], DIRS[(dirIndex + 3) % DIRS.length]]);
+    const currentDir = dir.split(",").map(Number);
+    const leftDir = DIRS[(dirIndex + 3) % DIRS.length].split(",").map(Number);
+    const rightDir = DIRS[(dirIndex + 1) % DIRS.length].split(",").map(Number);
 
-    let stepDir = [0, 0];
-
-    switch (dir) {
-      case "N":
-        stepDir = [0, -1];
-        break;
-      case "E":
-        stepDir = [1, 0];
-        break;
-      case "S":
-        stepDir = [0, 1];
-        break;
-      case "W":
-        stepDir = [-1, 0];
-        break;
-    }
-
-    nextPos.push([score + 1, [x + stepDir[0], y + stepDir[1]], dir]);
+    const nextPos: [number, [number, number], string][] = [
+      [score + 1, [x + currentDir[0], y + currentDir[1]], dir],
+      [
+        score + 1001,
+        [x + leftDir[0], y + leftDir[1]],
+        DIRS[(dirIndex + 3) % DIRS.length],
+      ],
+      [
+        score + 1001,
+        [x + rightDir[0], y + rightDir[1]],
+        DIRS[(dirIndex + 1) % DIRS.length],
+      ],
+    ];
 
     for (const [nScore, [nX, nY], nDir] of nextPos) {
       if (data[nY][nX] === "#") continue;
@@ -120,10 +113,10 @@ export function solve2(data: Elem[][]): number {
     }
   }
 
-  const bestSpots = new Map<string, boolean>();
+  const bestSpots = new Map<string, number>();
 
   for (const dir of DIRS) {
-    bestSpots.set(`${end[0]},${end[1]}|${dir},0`, true);
+    bestSpots.set(`${end[0]},${end[1]}|${dir}`, 0);
   }
 
   function isBestSpot(
@@ -131,40 +124,34 @@ export function solve2(data: Elem[][]): number {
     dir: string,
     gas: number,
   ): boolean {
-    const key = `${x},${y}|${dir},${gas}`;
+    if (gas < 0) return false;
+
+    const key = `${x},${y}|${dir}`;
 
     if (bestSpots.has(key)) {
-      return bestSpots.get(key)!;
+      if (bestSpots.get(key)! === 0) return true;
+      if (bestSpots.get(key)! >= gas) return false;
     }
-
-    if (gas <= 0) return false;
-
-    const nextPos: [number, [number, number], string][] = [];
 
     const dirIndex = DIRS.indexOf(dir);
 
-    nextPos.push([gas - 1000, [x, y], DIRS[(dirIndex + 1) % DIRS.length]]);
-    nextPos.push([gas - 2000, [x, y], DIRS[(dirIndex + 2) % DIRS.length]]);
-    nextPos.push([gas - 1000, [x, y], DIRS[(dirIndex + 3) % DIRS.length]]);
+    const currentDir = dir.split(",").map(Number);
+    const leftDir = DIRS[(dirIndex + 3) % DIRS.length].split(",").map(Number);
+    const rightDir = DIRS[(dirIndex + 1) % DIRS.length].split(",").map(Number);
 
-    let stepDir = [0, 0];
-
-    switch (dir) {
-      case "N":
-        stepDir = [0, -1];
-        break;
-      case "E":
-        stepDir = [1, 0];
-        break;
-      case "S":
-        stepDir = [0, 1];
-        break;
-      case "W":
-        stepDir = [-1, 0];
-        break;
-    }
-
-    nextPos.push([gas - 1, [x + stepDir[0], y + stepDir[1]], dir]);
+    const nextPos: [number, [number, number], string][] = [
+      [gas - 1, [x + currentDir[0], y + currentDir[1]], dir],
+      [
+        gas - 1001,
+        [x + leftDir[0], y + leftDir[1]],
+        DIRS[(dirIndex + 3) % DIRS.length],
+      ],
+      [
+        gas - 1001,
+        [x + rightDir[0], y + rightDir[1]],
+        DIRS[(dirIndex + 1) % DIRS.length],
+      ],
+    ];
 
     // note: it's .map(f).some((v) => v), not .some(f)
     // because, we want to perform dfs on every neighbor
@@ -173,16 +160,20 @@ export function solve2(data: Elem[][]): number {
         ([nGas, [nX, nY], nDir]) => isBestSpot([nX, nY], nDir, nGas),
       ).some((v) => v);
 
-    bestSpots.set(key, ans);
+    if (ans) {
+      bestSpots.set(key, 0);
+    } else {
+      bestSpots.set(key, Math.max(bestSpots.get(key)!, gas));
+    }
 
     return ans;
   }
 
   const maxGas = solve1(data);
-  isBestSpot(start, "E", maxGas);
+  isBestSpot(start, "1,0", maxGas);
 
   return new Set(
-    bestSpots.entries().filter(([_k, value]) => value).map(([k]) =>
+    bestSpots.entries().filter(([_k, value]) => value === 0).map(([k]) =>
       k.split("|")[0]
     ),
   ).size;
