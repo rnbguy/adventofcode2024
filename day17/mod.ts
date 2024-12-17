@@ -49,8 +49,7 @@ class Computer {
 
       switch (opcode) {
         case 0: { // adv
-          const divisor = Math.pow(2, data.getComboOperandValue(operand));
-          data.a = Math.trunc(data.a / divisor);
+          data.a = data.a >> data.getComboOperandValue(operand);
           instructionPointer += 2;
           break;
         }
@@ -60,7 +59,7 @@ class Computer {
           break;
         }
         case 2: { // bst
-          data.b = data.getComboOperandValue(operand) % 8;
+          data.b = data.getComboOperandValue(operand) & 0b111;
           instructionPointer += 2;
           break;
         }
@@ -78,19 +77,17 @@ class Computer {
           break;
         }
         case 5: { // out
-          output.push(data.getComboOperandValue(operand) % 8);
+          output.push(data.getComboOperandValue(operand) & 0b111);
           instructionPointer += 2;
           break;
         }
         case 6: { // bdv
-          const divisor = Math.pow(2, data.getComboOperandValue(operand));
-          data.b = Math.trunc(data.a / divisor);
+          data.b = data.a >> data.getComboOperandValue(operand);
           instructionPointer += 2;
           break;
         }
         case 7: { // cdv
-          const divisor = Math.pow(2, data.getComboOperandValue(operand));
-          data.c = Math.trunc(data.a / divisor);
+          data.c = data.a >> data.getComboOperandValue(operand);
           instructionPointer += 2;
           break;
         }
