@@ -4,12 +4,12 @@ const PATTERN =
   /Register A: (\d+)\nRegister B: (\d+)\nRegister C: (\d+)\n\nProgram: (\d+(?:,\d+)*)/;
 
 class Computer {
-  a: number;
-  b: number;
-  c: number;
+  a: bigint;
+  b: bigint;
+  c: bigint;
   program: number[];
 
-  constructor(a: number, b: number, c: number, program: number[]) {
+  constructor(a: bigint, b: bigint, c: bigint, program: number[]) {
     this.a = a;
     this.b = b;
     this.c = c;
@@ -18,13 +18,13 @@ class Computer {
 
   getComboOperandValue(
     operand: number,
-  ): number {
+  ): bigint {
     switch (operand) {
       case 0:
       case 1:
       case 2:
       case 3:
-        return operand;
+        return BigInt(operand);
       case 4:
         return this.a;
       case 5:
@@ -40,9 +40,9 @@ class Computer {
     return new Computer(this.a, this.b, this.c, this.program.slice());
   }
 
-  run(): { a: number; b: number; c: number; output: number[] } {
+  run(): { a: bigint; b: bigint; c: bigint; output: bigint[] } {
     const data = this.clone();
-    const output: number[] = [];
+    const output: bigint[] = [];
     let instructionPointer = 0;
 
     while (instructionPointer < data.program.length) {
@@ -56,17 +56,17 @@ class Computer {
           break;
         }
         case 1: { // bxl
-          data.b ^= operand;
+          data.b ^= BigInt(operand);
           instructionPointer += 2;
           break;
         }
         case 2: { // bst
-          data.b = data.getComboOperandValue(operand) & 0b111;
+          data.b = data.getComboOperandValue(operand) & 0b111n;
           instructionPointer += 2;
           break;
         }
         case 3: { // jnz
-          if (data.a === 0) {
+          if (data.a === 0n) {
             instructionPointer += 2;
           } else {
             instructionPointer = operand;
@@ -79,7 +79,7 @@ class Computer {
           break;
         }
         case 5: { // out
-          output.push(data.getComboOperandValue(operand) & 0b111);
+          output.push(data.getComboOperandValue(operand) & 0b111n);
           instructionPointer += 2;
           break;
         }
@@ -105,9 +105,9 @@ class Computer {
 export function parse(data: string): Computer {
   const [_m, a, b, c, program] = data.match(PATTERN)!;
   return new Computer(
-    Number(a),
-    Number(b),
-    Number(c),
+    BigInt(a),
+    BigInt(b),
+    BigInt(c),
     program.split(",").map(Number),
   );
 }
@@ -116,22 +116,22 @@ export function solve1(data: Computer): string {
   return data.run().output.join(",");
 }
 
-export function solve2(data: Computer): number {
+export function solve2(data: Computer): bigint {
   const initB = data.b;
   const initC = data.c;
 
   // (currentB, currentOutput) => [(currentA, nextB, nextC)]
-  const cache = new Map<string, [number, number, number][]>();
+  const cache = new Map<string, [bigint, bigint, bigint][]>();
 
-  for (let a = 0; a < 8; a++) {
-    for (let b = 0; b < 8; b++) {
-      for (let c = 0; c < 8; c++) {
+  for (let a = 0n; a < 8; a++) {
+    for (let b = 0n; b < 8; b++) {
+      for (let c = 0n; c < 8; c++) {
         data.a = a;
         data.b = b;
         data.c = c;
         const { a: nextA, b: nextB, c: nextC, output } = data.run();
         assert(output.length === 1);
-        assert(nextA === 0);
+        assert(nextA === 0n);
 
         const key = `${b},${c},${output[0]}`;
 
@@ -144,7 +144,7 @@ export function solve2(data: Computer): number {
     }
   }
 
-  let allChains = new Map<string, number[][]>();
+  let allChains = new Map<string, bigint[][]>();
 
   data.program.forEach((out, i) => {
     const key = `${initB},${initC},${out}`;
@@ -155,7 +155,7 @@ export function solve2(data: Computer): number {
         allChains.set(subKey, [[a]]);
       }
     } else {
-      const newAllChains = new Map<string, number[][]>();
+      const newAllChains = new Map<string, bigint[][]>();
 
       for (const [bcKey, chainA] of allChains) {
         const key = `${bcKey},${out}`;
@@ -175,15 +175,15 @@ export function solve2(data: Computer): number {
   });
 
   return allChains.values().flatMap((v) => v).map((as) =>
-    as.reduce((acc, v) => acc << 3 | v, 0)
+    as.reduce((acc, v) => acc << 3n | v, 0n)
   )
     .reduce((acc, v) => {
-      if (acc === 0 || v < acc) {
+      if (acc === 0n || v < acc) {
         return v;
       } else {
         return acc;
       }
-    }, 0);
+    }, 0n);
 }
 
 if (import.meta.main) {
