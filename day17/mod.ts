@@ -1,3 +1,5 @@
+import { assert } from "@std/assert/assert";
+
 const PATTERN =
   /Register A: (\d+)\nRegister B: (\d+)\nRegister C: (\d+)\n\nProgram: (\d+(?:,\d+)*)/;
 
@@ -38,7 +40,7 @@ class Computer {
     return new Computer(this.a, this.b, this.c, this.program.slice());
   }
 
-  run(): number[] {
+  run(): { a: number; b: number; c: number; output: number[] } {
     const data = this.clone();
     const output: number[] = [];
     let instructionPointer = 0;
@@ -96,7 +98,7 @@ class Computer {
       }
     }
 
-    return output;
+    return { a: data.a, b: data.b, c: data.c, output };
   }
 }
 
@@ -111,11 +113,77 @@ export function parse(data: string): Computer {
 }
 
 export function solve1(data: Computer): string {
-  return data.run().join(",");
+  return data.run().output.join(",");
 }
 
 export function solve2(data: Computer): number {
-  return data.program.length;
+  const initB = data.b;
+  const initC = data.c;
+
+  // (currentB, currentOutput) => [(currentA, nextB, nextC)]
+  const cache = new Map<string, [number, number, number][]>();
+
+  for (let a = 0; a < 8; a++) {
+    for (let b = 0; b < 8; b++) {
+      for (let c = 0; c < 8; c++) {
+        data.a = a;
+        data.b = b;
+        data.c = c;
+        const { a: nextA, b: nextB, c: nextC, output } = data.run();
+        assert(output.length === 1);
+        assert(nextA === 0);
+
+        const key = `${b},${c},${output[0]}`;
+
+        if (!cache.has(key)) {
+          cache.set(key, []);
+        }
+
+        cache.get(key)!.push([a, nextB, nextC]);
+      }
+    }
+  }
+
+  let allChains = new Map<string, number[][]>();
+
+  data.program.forEach((out, i) => {
+    const key = `${initB},${initC},${out}`;
+
+    if (i === 0) {
+      for (const [a, nextB, nextC] of cache.get(key)!) {
+        const subKey = `${nextB},${nextC}`;
+        allChains.set(subKey, [[a]]);
+      }
+    } else {
+      const newAllChains = new Map<string, number[][]>();
+
+      for (const [bcKey, chainA] of allChains) {
+        const key = `${bcKey},${out}`;
+        if (cache.has(key)) {
+          for (const [a, nextB, nextC] of cache.get(key)!) {
+            const subKey = `${nextB},${nextC}`;
+            if (!newAllChains.has(subKey)) {
+              newAllChains.set(subKey, []);
+            }
+            newAllChains.get(subKey)!.push(...chainA.map((v) => [a, ...v]));
+          }
+        }
+      }
+
+      allChains = newAllChains;
+    }
+  });
+
+  return allChains.values().flatMap((v) => v).map((as) =>
+    as.reduce((acc, v) => acc << 3 | v, 0)
+  )
+    .reduce((acc, v) => {
+      if (acc === 0 || v < acc) {
+        return v;
+      } else {
+        return acc;
+      }
+    }, 0);
 }
 
 if (import.meta.main) {
