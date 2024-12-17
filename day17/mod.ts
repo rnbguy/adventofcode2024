@@ -117,73 +117,39 @@ export function solve1(data: Computer): string {
 }
 
 export function solve2(data: Computer): bigint {
-  const initB = data.b;
-  const initC = data.c;
+  const needle = Array.from({ length: data.program.length }, (_, _i) => 0);
+  needle[needle.length - 1] = 1;
 
-  // (currentB, currentOutput) => [(currentA, nextB, nextC)]
-  const cache = new Map<string, [bigint, bigint, bigint][]>();
-
-  for (let a = 0n; a < 8; a++) {
-    for (let b = 0n; b < 8; b++) {
-      for (let c = 0n; c < 8; c++) {
-        data.a = a;
-        data.b = b;
-        data.c = c;
-        const { a: nextA, b: nextB, c: nextC, output } = data.run();
-        assert(output.length === 1);
-        assert(nextA === 0n);
-
-        const key = `${b},${c},${output[0]}`;
-
-        if (!cache.has(key)) {
-          cache.set(key, []);
+  function util(needle: number[], branchIndex: number): boolean {
+    // checking at branchIndex
+    const initValue = needle[branchIndex];
+    for (let val = needle[branchIndex]; val < 8; val++) {
+      needle[branchIndex] = val;
+      const tryA = needle.reduceRight((acc, v) => (acc << 3n) | BigInt(v), 0n);
+      data.a = tryA;
+      const { a: aNext, output } = data.run();
+      assert(output.length === data.program.length);
+      assert(aNext === 0n);
+      // find the last index where output[i] !== data.program[i]
+      let diffIndex = output.findLastIndex((v, j) =>
+        v !== BigInt(data.program[j])
+      );
+      if (diffIndex === -1) {
+        return true;
+      }
+      for (; diffIndex < branchIndex; diffIndex++) {
+        if (util(needle, diffIndex)) {
+          return true;
         }
-
-        cache.get(key)!.push([a, nextB, nextC]);
       }
     }
+    needle[branchIndex] = initValue;
+    return false;
   }
 
-  let allChains = new Map<string, bigint[][]>();
+  assert(util(needle, needle.length - 1));
 
-  data.program.forEach((out, i) => {
-    const key = `${initB},${initC},${out}`;
-
-    if (i === 0) {
-      for (const [a, nextB, nextC] of cache.get(key)!) {
-        const subKey = `${nextB},${nextC}`;
-        allChains.set(subKey, [[a]]);
-      }
-    } else {
-      const newAllChains = new Map<string, bigint[][]>();
-
-      for (const [bcKey, chainA] of allChains) {
-        const key = `${bcKey},${out}`;
-        if (cache.has(key)) {
-          for (const [a, nextB, nextC] of cache.get(key)!) {
-            const subKey = `${nextB},${nextC}`;
-            if (!newAllChains.has(subKey)) {
-              newAllChains.set(subKey, []);
-            }
-            newAllChains.get(subKey)!.push(...chainA.map((v) => [a, ...v]));
-          }
-        }
-      }
-
-      allChains = newAllChains;
-    }
-  });
-
-  return allChains.values().flatMap((v) => v).map((as) =>
-    as.reduce((acc, v) => acc << 3n | v, 0n)
-  )
-    .reduce((acc, v) => {
-      if (acc === 0n || v < acc) {
-        return v;
-      } else {
-        return acc;
-      }
-    }, 0n);
+  return needle.reduceRight((acc, v) => acc << 3n | BigInt(v), 0n);
 }
 
 if (import.meta.main) {
