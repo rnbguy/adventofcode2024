@@ -1,4 +1,5 @@
 import { assert } from "@std/assert/assert";
+import { BinaryHeap } from "jsr:@std/data-structures";
 
 class Memory {
   height: number;
@@ -31,72 +32,97 @@ class Memory {
     return grid;
   }
 
-  dfsContinuous(
-    [x, y]: [number, number],
-    time: number,
-    visited: string[],
-  ): number {
-    if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
-      return -1;
-    }
-    const key = `${x},${y}`;
-    if (x == this.width - 1 && y == this.height - 1) {
-      return time;
-    }
-    if (this.data.has(key) && this.data.get(key)! <= time) {
-      return -1;
-    }
-
-    return [[0, 1], [0, -1], [1, 0], [-1, 0]].map((
-      [dx, dy],
-    ) => [x + dx, y + dy]).filter(([x, y]) =>
-      visited.findIndex((v) => v == `${x},${y}`) == -1
-    ).map((
-      [px, py],
-    ) => {
-      visited.push(`${px},${py}`);
-      const ans = this.dfsContinuous([px, py], time + 1, visited);
-      visited.pop();
-      return ans;
-    }).filter((t) => t != -1).reduce(
-      (a, b) => Math.min(a, b),
-      Infinity,
-    );
-  }
-
   dfsFirstN(
     [x, y]: [number, number],
     visited: Set<string>,
+    cache: Map<string, [number, number][]>,
     time: number,
     dTime: number,
   ): [number, number][] {
     assert(0 <= x && x < this.width && 0 <= y && y < this.height);
     const key = `${x},${y}`;
 
+    if (cache.has(key)) {
+      return cache.get(key)!;
+    }
+
+    if (visited.has(key)) {
+      return [];
+    }
+
+    if (this.data.has(key) && this.data.get(key)! <= time) {
+      return [];
+    }
+
     if (x == this.width - 1 && y == this.height - 1) {
+      cache.set(key, [[x, y]]);
       return [[x, y]];
     }
 
-    const neighbors: [number, number][] = [[0, 1], [1, 0], [-1, 0], [0, -1]]
+    visited.add(key);
+
+    const ans = [[0, 1], [1, 0], [-1, 0], [0, -1]]
       .map((
         [dx, dy],
       ) => [x + dx, y + dy] as [number, number])
       .filter(([px, py]) =>
         (0 <= px && px < this.width) && (0 <= py && py < this.height)
-      ).filter(([px, py]) => !visited.has(`${px},${py}`));
+      ).filter(([px, py]) => !visited.has(`${px},${py}`)).map(([px, py]) =>
+        this.dfsFirstN([px, py], visited, cache, time + dTime, dTime)
+      ).filter((ar) => ar.length > 0).reduce(
+        (acc, ar) => acc.length == 0 || acc.length > ar.length ? ar : acc,
+        [],
+      );
 
-    visited.add(key);
+    if (ans.length > 0) {
+      cache.set(key, [[x, y], ...ans]);
+    } else {
+      cache.set(key, []);
+    }
 
-    const ans = neighbors.map(([px, py]) =>
-      this.dfsFirstN([px, py], visited, time + dTime, dTime)
-    ).reduce(
-      (acc, ar) => acc.length == 0 || acc.length > ar.length ? ar : acc,
-      [],
+    return cache.get(key)!;
+  }
+
+  bfs(time: number): [Map<string, number>, Map<string, [number, number]>] {
+    const heap = new BinaryHeap<[number, [number, number]]>((a, b) =>
+      a[0] - b[0]
     );
 
-    visited.delete(key);
+    const parentMap = new Map<string, [number, number]>();
+    const scoreMap = new Map<string, number>();
 
-    return ans;
+    heap.push([0, [0, 0]]);
+
+    while (heap.length > 0) {
+      const [score, [x, y]] = heap.pop()!;
+      const key = `${x},${y}`;
+      console.log(key, score);
+
+      if (score > (scoreMap.get(key) ?? 0)) continue;
+
+      if (x == this.width - 1 && y == this.height - 1) {
+        return [scoreMap, parentMap];
+      }
+
+      [[0, 1], [1, 0], [-1, 0], [0, -1]]
+        .map((
+          [dx, dy],
+        ) => [x + dx, y + dy] as [number, number])
+        .filter(([px, py]) =>
+          (0 <= px && px < this.width) && (0 <= py && py < this.height)
+        )
+        .filter(([px, py]) => (this.data.get(`${px},${py}`) ?? Infinity) > time)
+        .forEach(([px, py]) => {
+          const nScore = score + 1;
+          if (nScore < (scoreMap.get(`${px},${py}`) ?? Infinity)) {
+            parentMap.set(`${px},${py}`, [x, y]);
+            scoreMap.set(`${px},${py}`, nScore);
+            heap.push([nScore, [px, py]]);
+          }
+        });
+    }
+
+    return [scoreMap, parentMap];
   }
 }
 
@@ -113,9 +139,22 @@ export function solve1(data: Memory, time: number): number {
   const grid = data.grid(time);
   // console.log(grid.map((row) => row.join("")).join("\n"));
 
-  const path = data.dfsFirstN([0, 0], new Set(), time, 0);
+  const [scoreMap, parentMap] = data.bfs(time);
 
-  console.log(path);
+  console.log(scoreMap);
+
+  const path = [];
+  for (
+    let [x, y] = [data.width - 1, data.height - 1];
+    x != 0 || y != 0;
+    [x, y] = parentMap.get(`${x},${y}`)!
+  ) {
+    path.push([x, y]);
+  }
+
+  console.log(scoreMap);
+
+  const score = scoreMap.get(`${data.width - 1},${data.height - 1}`)!;
 
   for (const [x, y] of path) {
     if (grid[y][x] == ".") {
@@ -128,7 +167,7 @@ export function solve1(data: Memory, time: number): number {
 
   console.log(grid.map((row) => row.join("")).join("\n"));
 
-  return path.length - 1;
+  return score;
   // return data.dfsContinuous([0, 0], 0, []);
 }
 
