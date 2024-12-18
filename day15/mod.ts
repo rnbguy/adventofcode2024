@@ -1,4 +1,4 @@
-import { assert } from "@std/assert/assert";
+import { assert } from "@std/assert";
 
 type Move = "^" | "v" | "<" | ">";
 type Pos = "." | "#" | "O" | "@";
