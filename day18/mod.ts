@@ -93,13 +93,24 @@ export function solve1(data: Memory, time: number): number {
   return scoreMap.get(`${data.width - 1},${data.height - 1}`)!;
 }
 
-export function solve2(data: Memory): number {
-  return data.height * data.width;
+export function solve2(data: Memory, time: number): [number, number] {
+  let low = time;
+  let high = data.bytes.length;
+  while (low + 1 < high) {
+    const mid = (low + high) >> 1;
+    const [scoreMap, _parentMap] = data.bfs(mid);
+    if (scoreMap.has(`${data.width - 1},${data.height - 1}`)) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+  return data.bytes[high - 1];
 }
 
 if (import.meta.main) {
   const dataPath = new URL("input.txt", import.meta.url).pathname;
   const data = parse(await Deno.readTextFile(dataPath));
   console.log(solve1(data, 1024));
-  console.log(solve2(data));
+  console.log(solve2(data, 1024));
 }
