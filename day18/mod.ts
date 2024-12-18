@@ -43,7 +43,7 @@ class Memory {
     if (x == this.width - 1 && y == this.height - 1) {
       return time;
     }
-    if (this.data.has(key) && this.data.get(key)! >= time) {
+    if (this.data.has(key) && this.data.get(key)! <= time) {
       return -1;
     }
 
@@ -66,43 +66,37 @@ class Memory {
 
   dfsFirstN(
     [x, y]: [number, number],
+    visited: Set<string>,
     time: number,
-    distance: Map<string, [number, number][]>,
-  ) {
-    const key = `${x},${y}`;
-    if (distance.has(key)) {
-      return;
-    }
+    dTime: number,
+  ): [number, number][] {
     assert(0 <= x && x < this.width && 0 <= y && y < this.height);
+    const key = `${x},${y}`;
+
     if (x == this.width - 1 && y == this.height - 1) {
-      distance.set(key, [[x, y]]);
-      return;
-    }
-    if (this.data.has(key) && this.data.get(key)! <= time) {
-      distance.set(key, []);
-      return;
+      return [[x, y]];
     }
 
-    distance.set(key, []);
-
-    const neighbors = [[0, 1], [0, -1], [1, 0], [-1, 0]].map((
-      [dx, dy],
-    ) => [x + dx, y + dy])
+    const neighbors: [number, number][] = [[0, 1], [1, 0], [-1, 0], [0, -1]]
+      .map((
+        [dx, dy],
+      ) => [x + dx, y + dy] as [number, number])
       .filter(([px, py]) =>
         (0 <= px && px < this.width) && (0 <= py && py < this.height)
-      );
+      ).filter(([px, py]) => !visited.has(`${px},${py}`));
 
-    neighbors.forEach(([px, py]) => this.dfsFirstN([px, py], time, distance));
+    visited.add(key);
 
-    const ans: [number, number][] = neighbors
-      .map(([px, py]) => distance.get(`${px},${py}`)!)
-      .filter((d) => d.length > 0)
-      .map((p) => [[x, y], ...p] as [number, number][])
-      .reduce(
-        (a, b) => (a.length == 0 || a.length > b.length ? b : a),
-        [],
-      );
-    distance.set(key, ans);
+    const ans = neighbors.map(([px, py]) =>
+      this.dfsFirstN([px, py], visited, time + dTime, dTime)
+    ).reduce(
+      (acc, ar) => acc.length == 0 || acc.length > ar.length ? ar : acc,
+      [],
+    );
+
+    visited.delete(key);
+
+    return ans;
   }
 }
 
@@ -114,14 +108,28 @@ export function parse(data: string): Memory {
 }
 
 export function solve1(data: Memory, time: number): number {
+  // console.log(data.height, data.width);
+
   const grid = data.grid(time);
+  // console.log(grid.map((row) => row.join("")).join("\n"));
+
+  const path = data.dfsFirstN([0, 0], new Set(), time, 0);
+
+  console.log(path);
+
+  for (const [x, y] of path) {
+    if (grid[y][x] == ".") {
+      grid[y][x] = "O";
+    } else {
+      assert(grid[y][x] == "C");
+      grid[y][x] = "X";
+    }
+  }
+
   console.log(grid.map((row) => row.join("")).join("\n"));
 
-  // const map = new Map();
-  // data.dfsFirstN([0, 0], time, map);
-  // return map.get("0,0")!.length - 1;
-
-  return data.dfsContinuous([0, 0], 0, []);
+  return path.length - 1;
+  // return data.dfsContinuous([0, 0], 0, []);
 }
 
 export function solve2(data: Memory): number {
