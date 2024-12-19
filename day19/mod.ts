@@ -16,7 +16,23 @@ export function parse(data: string): Towels {
 }
 
 export function solve1(data: Towels): number {
-  return data.patterns.length * data.targets.length;
+  const isPossible = new Map<string, boolean>();
+
+  function utilRec(target: string): boolean {
+    if (isPossible.has(target)) return isPossible.get(target)!;
+    for (const pattern of data.patterns) {
+      if (!target.startsWith(pattern)) continue;
+      const nextSlice = target.slice(pattern.length, target.length);
+      let isNextPossible = false;
+      if (nextSlice.length === 0) isNextPossible = true;
+      else isNextPossible = utilRec(nextSlice);
+      isPossible.set(target, isNextPossible);
+      if (isNextPossible) return true;
+    }
+    return false;
+  }
+
+  return data.targets.filter((target) => utilRec(target)).length;
 }
 
 export function solve2(data: Towels): number {
