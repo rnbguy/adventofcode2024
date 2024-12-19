@@ -40,7 +40,10 @@ export function solve1(data: Towels): number {
 }
 
 export function solve2(data: Towels): number {
-  return data.patterns.length * data.targets.length;
+  const diffWays = new Map<string, number>();
+
+  return data.targets.map((target) => data.countDiffWays(target, diffWays))
+    .reduce((a, b) => a + b, 0);
 }
 
 if (import.meta.main) {
