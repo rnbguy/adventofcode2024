@@ -1,4 +1,3 @@
-import { assert } from "@std/assert/assert";
 import { BinaryHeap } from "jsr:@std/data-structures";
 
 class Memory {
