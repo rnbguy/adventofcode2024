@@ -3,7 +3,7 @@
 [![Deno](https://img.shields.io/badge/Deno-000?logo=deno&logoColor=70ffaf)][deno]
 [![CI](https://github.com/rnbguy/adventofcode2024/actions/workflows/deno.yaml/badge.svg)](https://github.com/rnbguy/adventofcode2024/actions/workflows/deno.yaml)
 
-This repo contains [typescript][tc] solutions for the
+This repo contains [TypeScript][tc] solutions for the
 [Advent of Code 2024][aoc2024] puzzles. The scripts are written to executed in
 the [Deno][deno] runtime.
 
@@ -11,15 +11,15 @@ the [Deno][deno] runtime.
 
 I have been using Deno for a while for personal scripting needs. Also, I always
 wanted to finish the Advent of Code puzzles. So, I decided to give a shot at
-solving this year's AoC using typescript. This way I can improve my typescript
+solving this year's AoC using TypeScript. This way I can improve my TypeScript
 as well as solve the puzzles.
 
 ## Thoughts
 
 ### Typescript
 
-So far, my experience with typescript has been subpar at solving AoC puzzles.
-Deno is a great runtime, but the typescript has been a bit of a pain to write
+So far, my experience with TypeScript has been subpar at solving AoC puzzles.
+Deno is a great runtime, but the TypeScript has been a bit of a pain to write
 data structures and algorithms. Coming from the Rust ecosystem, I missed some
 features very much.
 
@@ -43,7 +43,7 @@ features very much.
 
 ### Deno
 
-Deno has been great. I would have stopped using typescript if it weren't for
+Deno has been great. I would have stopped using TypeScript if it weren't for
 Deno. The runtime is great, and the `jsr:@std` library is very useful. None of
 my solution uses any external dependencies except `jsr:@std`. Deno's test and
 assert libraries allowed me to test my solutions. I can use a single binary for
