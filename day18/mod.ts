@@ -7,7 +7,7 @@ class Memory {
   constructor(bytes: [number, number][]) {
     this.height = 0;
     this.width = 0;
-    bytes.forEach(([x, y], i) => {
+    bytes.forEach(([x, y]) => {
       this.height = Math.max(this.height, y);
       this.width = Math.max(this.width, x);
     });

@@ -6,8 +6,29 @@ on:
       - main
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno lint
   test:
     name: Test
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno task test
+  lcov:
+    needs: [lint, test]
+    name: Code Coverage
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
