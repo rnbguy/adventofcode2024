@@ -1,5 +1,8 @@
 # adventofcode2024
 
+[![Deno](https://img.shields.io/badge/Deno-000?logo=deno&logoColor=70ffaf)][deno]
+[![CI](https://github.com/rnbguy/adventofcode2024/actions/workflows/deno.yaml/badge.svg)](https://github.com/rnbguy/adventofcode2024/actions/workflows/deno.yaml)
+
 This repo contains [typescript][tc] solutions for the
 [Advent of Code 2024][aoc2024] puzzles. The scripts are written to executed in
 the [Deno][deno] runtime.
