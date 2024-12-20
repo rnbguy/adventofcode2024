@@ -5,5 +5,5 @@ Deno.test(async function testExample() {
   const dataPath = new URL("example.txt", import.meta.url).pathname;
   const data = parse(await Deno.readTextFile(dataPath));
   assertEquals(solve1(data, 10), 10);
-  assertEquals(solve2(data), 225);
+  assertEquals(solve2(data, 70), 41);
 });

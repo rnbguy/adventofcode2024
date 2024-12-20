@@ -53,21 +53,33 @@ class Grid {
     }
   }
 
-  shortCircuits(): [number, number, number][] {
-    const countSC = [];
+  shortCircuits(maxCheatLength: number): [number, number, number][] {
+    const countSC: [number, number, number][] = [];
 
     for (let p = 0; p < this.path.length; p++) {
-      for (let q = p + 2; q < this.path.length; q++) {
-        const [px, py] = this.path[p];
-        const [qx, qy] = this.path[q];
-        if (
-          !DIRS.some(([dx, dy]) => px + dx * 2 === qx && py + dy * 2 === qy)
-        ) continue;
-        const pScore = this.score.get(`${px},${py}`)!;
-        const qScore = this.score.get(`${qx},${qy}`)!;
-        assert(qScore >= pScore + 2);
-        if (qScore === pScore + 2) continue;
-        countSC.push([p, q, qScore - pScore - 2] as [number, number, number]);
+      const [px, py] = this.path[p];
+      const scoreP = this.score.get(`${px},${py}`)!;
+      for (let cheatX = 0; cheatX <= maxCheatLength; cheatX++) {
+        for (let cheatY = 0; cheatY <= maxCheatLength - cheatX; cheatY++) {
+          const cheatLength = cheatX + cheatY;
+          assert(cheatLength <= maxCheatLength);
+          const visited = new Set<string>();
+          [[1, 1], [1, -1], [-1, -1], [-1, 1]].forEach(([dirx, diry]) => {
+            const [qx, qy] = [px + cheatX * dirx, py + cheatY * diry];
+            if (visited.has(`${qx},${qy}`)) return;
+            visited.add(`${qx},${qy}`);
+            if (!this.score.has(`${qx},${qy}`)) return;
+            const scoreQ = this.score.get(`${qx},${qy}`)!;
+            if (scoreQ - scoreP <= cheatLength) return;
+            countSC.push(
+              [p, scoreQ, scoreQ - scoreP - cheatLength] as [
+                number,
+                number,
+                number,
+              ],
+            );
+          });
+        }
       }
     }
 
@@ -82,17 +94,18 @@ export function parse(data: string): Grid {
 }
 
 export function solve1(data: Grid, minimumSC: number): number {
-  const sc = data.shortCircuits();
+  const sc = data.shortCircuits(2);
   return sc.filter(([, , len]) => len >= minimumSC).length;
 }
 
-export function solve2(data: Grid): number {
-  return data.height * data.length;
+export function solve2(data: Grid, minimumSC: number): number {
+  const sc = data.shortCircuits(20);
+  return sc.filter(([, , len]) => len >= minimumSC).length;
 }
 
 if (import.meta.main) {
   const dataPath = new URL("input.txt", import.meta.url).pathname;
   const data = parse(await Deno.readTextFile(dataPath));
   console.log(solve1(data, 100));
-  console.log(solve2(data));
+  console.log(solve2(data, 100));
 }
