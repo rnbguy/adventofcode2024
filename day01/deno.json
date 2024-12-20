@@ -1,5 +1,5 @@
 {
-  "name": "@scope/day8",
+  "name": "@scope/day01",
   "version": "0.1.0",
   "exports": {
     ".": "./mod.ts"
