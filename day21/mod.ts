@@ -41,7 +41,7 @@ class Robot {
   positions(): [number, number][] {
     return [
       this.position.slice() as [number, number],
-      ...this.passTo ? this.passTo.positions() : [],
+      ...(this.passTo ? this.passTo.positions() : []),
     ];
   }
 
