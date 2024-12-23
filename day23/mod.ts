@@ -28,7 +28,7 @@ class Graph {
     }
   }
 
-  findCliques(size: number): Set<string>[] {
+  findCliques(size: number): string[][] {
     const cliques: Set<string> = new Set();
     const visited = new Set<string>();
     const current: string[] = [];
@@ -61,7 +61,40 @@ class Graph {
     };
 
     backtrack();
-    return Array.from(cliques).map((clique) => new Set(clique.split(",")));
+    return Array.from(cliques).map((clique) => clique.split(","));
+  }
+
+  findAllCliques(): string[][] {
+    const allCliques: string[][] = [];
+    const R = new Set<string>();
+    const P = new Set(this.adjMap.keys());
+    const X = new Set<string>();
+
+    const bronKerbosch = (R: Set<string>, P: Set<string>, X: Set<string>) => {
+      if (P.size === 0 && X.size === 0) {
+        allCliques.push(Array.from(R).sort());
+        return;
+      }
+
+      const u = [...P, ...X][0];
+      const candidates = new Set(
+        [...P].filter((v) => !this.adjMap.get(u)?.has(v)),
+      );
+
+      for (const v of candidates) {
+        const neighbors = this.adjMap.get(v) || new Set();
+        bronKerbosch(
+          new Set([...R, v]),
+          new Set([...P].filter((x) => neighbors.has(x))),
+          new Set([...X].filter((x) => neighbors.has(x))),
+        );
+        P.delete(v);
+        X.add(v);
+      }
+    };
+
+    bronKerbosch(R, P, X);
+    return allCliques;
   }
 }
 
@@ -71,12 +104,23 @@ export function solve1(data: [string, string][]): number {
   graph.addUndirEdges(data);
 
   return graph.findCliques(3).filter((clique) =>
-    Array.from(clique).some((v) => v.startsWith("t"))
+    clique.some((v) => v.startsWith("t"))
   ).length;
 }
 
-export function solve2(data: [string, string][]): number {
-  return data.length;
+export function solve2(data: [string, string][]): string {
+  const graph = new Graph();
+
+  graph.addUndirEdges(data);
+
+  const allCliques = graph.findAllCliques();
+  const validCliques = allCliques.filter((clique) =>
+    clique.some((v) => v.startsWith("t"))
+  );
+  return validCliques.reduce(
+    (max, clique) => clique.length > max.length ? clique : max,
+    [],
+  ).join(",");
 }
 
 if (import.meta.main) {
