@@ -28,40 +28,34 @@ class Graph {
     }
   }
 
-  findCliques(size: number): string[][] {
-    const cliques: Set<string> = new Set();
-    const visited = new Set<string>();
-    const current: string[] = [];
+  findCliquesOfSize(size: number): string[][] {
+    const allCliques = this.findAllCliques();
+    const result = new Set<string>();
 
-    const backtrack = (vertex: string | undefined = undefined) => {
-      if (current.length === size) {
-        const ar = current.slice();
-        ar.sort();
-        cliques.add(ar.join(","));
-        return;
+    const pickN = (arr: string[], n: number): string[][] => {
+      if (n === 0) {
+        return [[]];
       }
 
-      const candidates = vertex === undefined
-        ? Array.from(this.adjMap.keys())
-        : Array.from(this.adjMap.get(vertex) || []);
-
-      for (const next of candidates) {
-        if (visited.has(next)) continue;
-        if (
-          current.length > 0 &&
-          !current.every((v) => this.adjMap.get(v)?.has(next))
-        ) continue;
-
-        visited.add(next);
-        current.push(next);
-        backtrack(next);
-        current.pop();
-        visited.delete(next);
+      if (arr.length === 0) {
+        return [];
       }
+
+      const head = arr[0];
+      const tail = arr.slice(1);
+      const withHead = pickN(tail, n - 1).map((comb) => [head, ...comb]);
+      const withoutHead = pickN(tail, n);
+
+      return [...withHead, ...withoutHead];
     };
 
-    backtrack();
-    return Array.from(cliques).map((clique) => clique.split(","));
+    for (const clique of allCliques) {
+      for (const combination of pickN(clique, size)) {
+        result.add(combination.join(","));
+      }
+    }
+
+    return Array.from(result).map((clique) => clique.split(","));
   }
 
   findAllCliques(): string[][] {
@@ -103,7 +97,7 @@ export function solve1(data: [string, string][]): number {
 
   graph.addUndirEdges(data);
 
-  return graph.findCliques(3).filter((clique) =>
+  return graph.findCliquesOfSize(3).filter((clique) =>
     clique.some((v) => v.startsWith("t"))
   ).length;
 }
