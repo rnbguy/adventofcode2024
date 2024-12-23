@@ -150,28 +150,23 @@ function calculateShortestSequence(
     for (const nextKey of remainingCode) {
       let minCost = Infinity;
 
+      const pathsKey = `${loopCurrentKey},${nextKey}`;
+
+      let paths;
+
       if (robotIndex === numRobots) {
-        const pathsKey = `${loopCurrentKey},${nextKey}`;
-        const [, paths] = pinPadPaths.get(pathsKey)!;
-        for (const path of paths) {
-          const cost = solve(
-            robotIndex - 1,
-            "A",
-            path + "A",
-          );
-          minCost = Math.min(minCost, cost);
-        }
+        [, paths] = pinPadPaths.get(pathsKey)!;
       } else {
-        const pathsKey = `${loopCurrentKey},${nextKey}`;
-        const [, paths] = directionalPadPaths.get(pathsKey)!;
-        for (const path of paths) {
-          const cost = solve(
-            robotIndex - 1,
-            "A",
-            path + "A",
-          );
-          minCost = Math.min(minCost, cost);
-        }
+        [, paths] = directionalPadPaths.get(pathsKey)!;
+      }
+
+      for (const path of paths) {
+        const cost = solve(
+          robotIndex - 1,
+          "A",
+          path + "A",
+        );
+        minCost = Math.min(minCost, cost);
       }
 
       totalCost += minCost;
