@@ -117,7 +117,7 @@ class Device {
     let changed = true;
     while (changed) {
       changed = false;
-      for (const [wire, deps] of dependencies) {
+      for (const [, deps] of dependencies) {
         for (const dep of deps) {
           for (const depDep of dependencies.get(dep)!) {
             if (!deps.has(depDep)) {
@@ -195,7 +195,7 @@ class Device {
   ): boolean {
     const expected = this.expectedGates(level, maxLevel);
     const { and, or, xor } = gates.reduce(
-      (acc, [a, op, b]) => {
+      (acc, [, op]) => {
         switch (op) {
           case "AND":
             acc.and++;
@@ -246,7 +246,7 @@ class Device {
     if (expected.xor > 0 && expected.xor === xor) {
       const levelKey = level.toString().padStart(2, "0");
       if (
-        gates.filter(([a, op, b, w]) => op === "XOR" && w === `z${levelKey}`)
+        gates.filter(([, op, , w]) => op === "XOR" && w === `z${levelKey}`)
           .length === 0
       ) {
         return false;
