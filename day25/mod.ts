@@ -34,7 +34,7 @@ class Schematics {
         this.addKey(pins);
       }
     } else {
-      assert(false);
+      throw new Error("Invalid input format");
     }
   }
 
