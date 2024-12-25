@@ -39,12 +39,9 @@ class Schematics {
   }
 
   doesFit(lock: Pins, key: Pins): boolean {
-    for (let i = 0; i < 5; i++) {
-      if (lock[i] + key[i] > 5) {
-        return false;
-      }
-    }
-    return true;
+    return Array.from({ length: 5 }, (_, i) => lock[i] + key[i]).every((sum) =>
+      sum <= 5
+    );
   }
 }
 
